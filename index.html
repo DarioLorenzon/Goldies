@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 
+<meta name="viewport"
+content="width=device-width, initial-scale=1, maximum-scale=1">
+
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -19,19 +22,13 @@ h2{
 margin:8px;
 }
 
-/* OUTER WRAPPER */
+/* scroll */
 
 .scroll-x{
 overflow-x:auto;
+overflow-y:auto;
 width:100%;
 -webkit-overflow-scrolling:touch;
-}
-
-/* INNER WRAPPER */
-
-.scroll-y{
-overflow-y:auto;
-max-height:80vh;
 }
 
 /* table */
@@ -39,7 +36,7 @@ max-height:80vh;
 table{
 border-collapse:collapse;
 width:max-content;
-min-width:100%;
+min-width:900px;
 }
 
 td,th{
@@ -69,14 +66,14 @@ z-index:2;
 text-align:left;
 }
 
-/* top left */
+/* corner */
 
 .header-name{
 position:sticky;
 top:0;
 left:0;
 background:#ccc;
-z-index:5;
+z-index:4;
 }
 
 /* colors */
@@ -110,23 +107,27 @@ font-size:16px;
 <button onclick="save()">Speichern</button>
 
 <div class="scroll-x">
-<div class="scroll-y">
 <table id="t"></table>
-</div>
 </div>
 
 <script>
 
+
+// ---------- Firebase ----------
+
 const firebaseConfig = {
-  apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
-  authDomain: "goldies-89ea2.firebaseapp.com",
-  projectId: "goldies-89ea2"
+apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
+authDomain: "goldies-89ea2.firebaseapp.com",
+projectId: "goldies-89ea2"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 let data=[];
+
+
+// ---------- CSV ----------
 
 function loadCSV(){
 
@@ -162,6 +163,9 @@ resolve(rows)
 
 }
 
+
+// ---------- weekend ----------
+
 function isWeekend(text){
 
 if(!text) return false
@@ -182,9 +186,13 @@ return day===0 || day===6
 
 }
 
+
+// ---------- draw ----------
+
 function draw(){
 
 let t=document.getElementById("t")
+
 t.innerHTML=""
 
 if(!data.length) return
@@ -209,7 +217,9 @@ td.textContent=val
 
 if(c===0) td.className="header-name"
 
-if(isWeekend(val)) td.classList.add("weekend")
+if(isWeekend(val)){
+td.classList.add("weekend")
+}
 
 }
 
@@ -264,6 +274,9 @@ t.appendChild(tr)
 
 }
 
+
+// total
+
 let tr=document.createElement("tr")
 
 for(let c=0;c<cols;c++){
@@ -290,6 +303,9 @@ t.appendChild(tr)
 
 }
 
+
+// ---------- load ----------
+
 async function load(){
 
 try{
@@ -315,6 +331,9 @@ data=await loadCSV()
 draw()
 
 }
+
+
+// ---------- save ----------
 
 async function save(){
 
