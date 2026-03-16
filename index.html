@@ -2,75 +2,34 @@
 <html>
 <head>
 <meta charset="UTF-8">
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 </head>
 
 <body>
 
-<h2>Test Tabelle</h2>
+<h2>Firebase Test</h2>
 
-<table id="t"></table>
+<div id="status">lädt...</div>
 
 <script>
 
-let data = [
+const firebaseConfig = {
+  apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
+  authDomain: "goldies-89ea2.firebaseapp.com",
+  projectId: "goldies-89ea2",
+  storageBucket: "goldies-89ea2.firebasestorage.app",
+  messagingSenderId: "210598012879",
+  appId: "1:210598012879:web:dca79e3e3eb237e5bb14ba"
+};
 
-["Name","14.05","21.05","28.05"],
-["Dario","","",""],
-["Marco","","",""],
-["Sven","","",""]
+firebase.initializeApp(firebaseConfig);
 
-]
+const db = firebase.firestore();
 
-
-function draw(){
-
-let t=document.getElementById("t")
-
-t.innerHTML=""
-
-data.forEach((row,r)=>{
-
-let tr=document.createElement("tr")
-
-row.forEach((c,i)=>{
-
-let td=document.createElement(r?"td":"th")
-
-if(r && i){
-
-let s=document.createElement("select")
-
-;["","ja","ev","nein"].forEach(v=>{
-
-let o=document.createElement("option")
-o.value=v
-o.text=v
-
-if(c==v) o.selected=true
-
-s.appendChild(o)
-
-})
-
-td.appendChild(s)
-
-}else{
-
-td.textContent=c
-
-}
-
-tr.appendChild(td)
-
-})
-
-t.appendChild(tr)
-
-})
-
-}
-
-draw()
+document.getElementById("status").innerText = "Firebase geladen";
 
 </script>
 
