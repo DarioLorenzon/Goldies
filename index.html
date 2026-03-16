@@ -331,17 +331,16 @@ t.appendChild(trTotal);
 
 // header again
 
-let trBottom=document.createElement("tr");
+let trBottom = document.createElement("tr");
 
-for(let c=0;c<cols;c++){
+for(let c=0; c<cols; c++){
 
-let th=document.createElement("th");
+let th = document.createElement("th");
 
 let val = data[0][c] || "";
 
 th.textContent = val;
 
-// Wochenende auch unten markieren
 if(isWeekend(val)){
 th.classList.add("weekend");
 }
