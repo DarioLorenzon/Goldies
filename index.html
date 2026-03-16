@@ -22,12 +22,16 @@ h2{
 margin:8px;
 }
 
+/* scroll */
+
 .scroll-x{
 overflow-x:auto;
 overflow-y:auto;
 width:100%;
 -webkit-overflow-scrolling:touch;
 }
+
+/* table */
 
 table{
 border-collapse:collapse;
@@ -43,10 +47,26 @@ min-width:70px;
 background:white;
 }
 
+/* first column fixed */
+
 .name{
+position:sticky;
+left:0;
 background:#f0f0f0;
+z-index:5;
 text-align:left;
 }
+
+/* header first cell */
+
+th:first-child{
+position:sticky;
+left:0;
+background:#ccc;
+z-index:6;
+}
+
+/* colors */
 
 .ja{background:#8f8;}
 .ev{background:#ff8;}
@@ -72,8 +92,7 @@ font-size:16px;
 
 <body>
 
-<h2>Goldies Termine</h2>
-
+<h2>Training</h2>
 
 <div class="scroll-x">
 <table id="t"></table>
@@ -360,8 +379,6 @@ await db.collection("training").doc("list").set({
 json:JSON.stringify(data)
 
 })
-
-console.log("saved")
 
 }
 
