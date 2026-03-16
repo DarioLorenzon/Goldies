@@ -4,16 +4,23 @@
 
 <meta charset="UTF-8">
 
-<script type="module">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+</head>
 
+<body>
+
+<h2>Handball Training</h2>
+
+<button onclick="save()">Speichern</button>
+
+<br><br>
+
+<table id="t"></table>
+
+
+<script>
 
 const firebaseConfig = {
   apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
@@ -25,18 +32,20 @@ const firebaseConfig = {
   measurementId: "G-2T3PTP7J0Z"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
 
 let data = [];
 
 
 async function load() {
 
-  const ref = doc(db, "training", "list");
-  const snap = await getDoc(ref);
+  const ref = db.collection("training").doc("list");
 
-  if (snap.exists()) {
+  const snap = await ref.get();
+
+  if (snap.exists) {
 
     data = snap.data().data;
 
@@ -52,12 +61,14 @@ async function load() {
   }
 
   draw();
+
 }
 
 
 function draw() {
 
   let t = document.getElementById("t");
+
   t.innerHTML = "";
 
   data.forEach((row, r) => {
@@ -75,6 +86,7 @@ function draw() {
         ["", "ja", "ev", "nein"].forEach(v => {
 
           let o = document.createElement("option");
+
           o.text = v;
           o.value = v;
 
@@ -107,9 +119,9 @@ function draw() {
 
 async function save() {
 
-  const ref = doc(db, "training", "list");
+  const ref = db.collection("training").doc("list");
 
-  await setDoc(ref, {
+  await ref.set({
     data: data
   });
 
@@ -118,23 +130,9 @@ async function save() {
 }
 
 
-window.save = save;
-
 load();
 
 </script>
-
-</head>
-
-<body>
-
-<h2>Handball Training</h2>
-
-<button onclick="save()">Speichern</button>
-
-<br><br>
-
-<table id="t"></table>
 
 </body>
 </html>
