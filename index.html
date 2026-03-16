@@ -482,6 +482,31 @@ t.appendChild(trBottom);
 
 }
 
+// ===== TYP UNTEN =====
+
+let trTypeBottom = document.createElement("tr");
+
+visibleCols.forEach(c => {
+
+    let td = document.createElement("td");
+
+    let val = (data[1] && data[1][c]) ? data[1][c] : "";
+
+    td.textContent = val;
+
+    td.style.fontSize = "12px";
+    td.style.color = "#555";
+
+    if(c===0){
+        td.className = "name";
+    }
+
+    trTypeBottom.appendChild(td);
+
+});
+
+t.appendChild(trTypeBottom); 
+
 
 // ---------- LOAD ----------
 
