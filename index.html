@@ -99,21 +99,53 @@ resolve(defaultData())
 function draw(){
 
 let t=document.getElementById("t")
-
 t.innerHTML=""
 
-data.forEach((row,r)=>{
+for(let r=0;r<data.length;r++){
 
 let tr=document.createElement("tr")
 
-row.forEach((c,i)=>{
+for(let i=0;i<data[r].length;i++){
 
-let td=document.createElement(r ? "td" : "th")
+let td=document.createElement(r==0?"th":"td")
 
-// Kopfzeile
-if(r==0){
+if(r>0 && i>0){
 
-td.textContent=c
+let s=document.createElement("select")
+
+let val=data[r][i]||""
+
+;["","ja","ev","nein"].forEach(v=>{
+
+let o=document.createElement("option")
+o.value=v
+o.text=v
+
+if(val==v) o.selected=true
+
+s.appendChild(o)
+
+})
+
+s.onchange=()=>{
+data[r][i]=s.value
+}
+
+td.appendChild(s)
+
+}else{
+
+td.textContent=data[r][i]
+
+}
+
+tr.appendChild(td)
+
+}
+
+t.appendChild(tr)
+
+}
 
 }
 
