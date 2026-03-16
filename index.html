@@ -47,14 +47,12 @@ return new Promise((resolve)=>{
 Papa.parse("./teilnahmen.csv",{
 
 download:true,
-
 delimiter:";",
-
 skipEmptyLines:false,
 
 complete:(res)=>{
 
-console.log("CSV",res.data)
+console.log("CSV geladen",res.data)
 
 resolve(res.data)
 
@@ -71,6 +69,8 @@ resolve(defaultData())
 })
 
 })
+
+}
 
 }
 
