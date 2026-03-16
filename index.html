@@ -101,9 +101,26 @@ let tr=document.createElement("tr")
 
 row.forEach((c,i)=>{
 
-let td=document.createElement(r?"td":"th")
+let td=document.createElement(r ? "td" : "th")
 
-if(r && i){
+// Kopfzeile
+if(r==0){
+
+td.textContent=c
+
+}
+
+// Name Spalte
+else if(i==0){
+
+td.textContent=c
+
+}
+
+// Auswahlfelder
+else{
+
+let value = c ? c.trim() : ""
 
 let s=document.createElement("select")
 
@@ -114,19 +131,19 @@ let o=document.createElement("option")
 o.value=v
 o.text=v
 
-if(c==v) o.selected=true
+if(value==v) o.selected=true
 
 s.appendChild(o)
 
 })
 
-s.onchange=()=>data[r][i]=s.value
+s.onchange=()=>{
+
+data[r][i]=s.value
+
+}
 
 td.appendChild(s)
-
-}else{
-
-td.textContent=c
 
 }
 
