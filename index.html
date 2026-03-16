@@ -147,6 +147,16 @@ async function load(){
 
 try{
 
+// zuerst CSV laden
+
+let csv = await loadCSV()
+
+if(csv && csv.length > 1){
+
+data = csv
+
+}else{
+
 let doc = await db.collection("training").doc("list").get()
 
 if(doc.exists && doc.data().json){
@@ -155,13 +165,15 @@ data = JSON.parse(doc.data().json)
 
 }else{
 
-data = await loadCSV()
+data = defaultData()
+
+}
 
 }
 
 }catch(e){
 
-data = await loadCSV()
+data = defaultData()
 
 }
 
