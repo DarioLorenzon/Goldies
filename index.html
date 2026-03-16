@@ -95,6 +95,28 @@ let data = [];
 
 // ---------- CSV ----------
 
+function isWeekend(text){
+
+if(!text) return false
+
+// erwartet Format TT.MM oder TT.MM.JJJJ
+
+let parts=text.split(".")
+
+if(parts.length<2) return false
+
+let d=parseInt(parts[0])
+let m=parseInt(parts[1])-1
+let y=2026
+
+let date=new Date(y,m,d)
+
+let day=date.getDay()
+
+return day===0 || day===6
+
+}
+  
 function loadCSV(){
 
 return new Promise((resolve)=>{
@@ -159,7 +181,7 @@ td.textContent=val
 
 if(c===0) td.className="header-name"
 
-if(val.includes("Sa") || val.includes("So")){
+if(isWeekend(val)){
 td.classList.add("weekend")
 }
 
