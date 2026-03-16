@@ -36,42 +36,73 @@ min-width:55px;
 background:white;
 }
 
+
+/* -------- Name Spalte schmal + weiss -------- */
+
 .name{
 position:sticky;
 left:0;
-background:#f0f0f0;
+background:white;
 z-index:5;
 text-align:left;
 font-weight:bold;
-min-width:90px;
+min-width:60px;
 }
+
+
+/* -------- erste Kopfzelle weiss -------- */
 
 th:first-child{
 position:sticky;
 left:0;
-background:#ccc;
+background:white;
 z-index:6;
 }
+
+
+/* -------- Farben -------- */
 
 .ja{background:#8f8;}
 .ev{background:#ff8;}
 .nein{background:#f88;}
 
-.count{background:#ddd;font-weight:bold;}
+
+/* -------- Total dezenter -------- */
+
+.count{
+background:#f5f5f5;
+font-weight:normal;
+font-size:12px;
+color:#444;
+}
+
+.total{
+font-size:12px;
+font-weight:normal;
+color:#555;
+}
+
+
+/* -------- Wochenende -------- */
 
 .weekend{
 background:#e6ccff;
 font-weight:bold;
 }
 
+
 select{
 font-size:14px;
 padding:2px;
 }
 
+
 @media (max-width:700px){
+
 td,th{min-width:45px;padding:2px;}
-.name{min-width:70px;}
+
+.name{min-width:50px;}
+
 }
 
 </style>
@@ -257,7 +288,7 @@ visibleCols.push(c);
 }
 
 
-// counts zuerst berechnen
+// counts
 
 let counts=new Array(data[0].length).fill(0);
 
@@ -311,7 +342,7 @@ let td=document.createElement("td");
 
 if(c===0){
 td.textContent="Total";
-td.className="name";
+td.className="name total";
 }else{
 td.textContent=counts[c];
 td.className="count";
