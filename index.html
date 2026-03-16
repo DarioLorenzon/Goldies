@@ -22,16 +22,12 @@ h2{
 margin:8px;
 }
 
-/* scroll */
-
 .scroll-x{
 overflow-x:auto;
 overflow-y:auto;
 width:100%;
 -webkit-overflow-scrolling:touch;
 }
-
-/* table */
 
 table{
 border-collapse:collapse;
@@ -47,36 +43,10 @@ min-width:70px;
 background:white;
 }
 
-/* HEADER FIX */
-
-th{
-position:sticky;
-top:0;
-background:#ddd;
-z-index:10;
-}
-
-/* FIRST COLUMN FIX */
-
 .name{
-position:sticky;
-left:0;
 background:#f0f0f0;
-z-index:5;
 text-align:left;
 }
-
-/* TOP LEFT CORNER FIX */
-
-.header-name{
-position:sticky;
-top:0;
-left:0;
-background:#ccc;
-z-index:20;
-}
-
-/* COLORS */
 
 .ja{background:#8f8;}
 .ev{background:#ff8;}
@@ -104,7 +74,7 @@ font-size:16px;
 
 <h2>Training</h2>
 
-<button onclick="save()">Speichern</button>
+<button onclick="save()">Manuell speichern</button>
 
 <div class="scroll-x">
 <table id="t"></table>
@@ -125,6 +95,23 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 let data=[];
+
+
+// ---------- AUTOSAVE ----------
+
+let saveTimer=null;
+
+function autoSave(){
+
+if(saveTimer) clearTimeout(saveTimer);
+
+saveTimer=setTimeout(()=>{
+
+save();
+
+},800);
+
+}
 
 
 // ---------- CSV ----------
@@ -186,7 +173,7 @@ return day===0 || day===6
 
 }
 
-  
+
 // ---------- draw ----------
 
 function draw(){
@@ -202,7 +189,7 @@ let cols=data[0].length
 let counts=new Array(cols).fill(0)
 
 
-// ---------- HEADER ----------
+// HEADER
 
 let trHead=document.createElement("tr")
 
@@ -214,11 +201,7 @@ let val=data[0][c]||""
 
 th.textContent=val
 
-if(c===0) th.className="header-name"
-
-if(isWeekend(val)){
-th.classList.add("weekend")
-}
+if(isWeekend(val)) th.classList.add("weekend")
 
 trHead.appendChild(th)
 
@@ -227,7 +210,7 @@ trHead.appendChild(th)
 t.appendChild(trHead)
 
 
-// ---------- DATA ----------
+// DATA
 
 for(let r=1;r<data.length;r++){
 
@@ -253,6 +236,7 @@ let opts=["","ja","ev","nein"]
 opts.forEach(v=>{
 
 let o=document.createElement("option")
+
 o.value=v
 o.text=v
 
@@ -289,7 +273,7 @@ t.appendChild(tr)
 }
 
 
-// ---------- TOTAL ----------
+// TOTAL
 
 let trTotal=document.createElement("tr")
 
@@ -316,7 +300,7 @@ trTotal.appendChild(td)
 t.appendChild(trTotal)
 
 
-// ---------- HEADER AGAIN ----------
+// HEADER AGAIN
 
 let trBottom=document.createElement("tr")
 
@@ -328,11 +312,7 @@ let val=data[0][c]||""
 
 th.textContent=val
 
-if(c===0) th.className="header-name"
-
-if(isWeekend(val)){
-th.classList.add("weekend")
-}
+if(isWeekend(val)) th.classList.add("weekend")
 
 trBottom.appendChild(th)
 
@@ -367,20 +347,6 @@ data=await loadCSV()
 
 }
 
-let saveTimer=null
-
-function autoSave(){
-
-if(saveTimer) clearTimeout(saveTimer)
-
-saveTimer=setTimeout(()=>{
-
-save()
-
-},800)
-
-}
-  
 draw()
 
 }
@@ -396,9 +362,10 @@ json:JSON.stringify(data)
 
 })
 
-alert("gespeichert")
+console.log("saved")
 
 }
+
 
 load()
 
