@@ -23,16 +23,12 @@ h2{
 margin:6px;
 }
 
-/* scroll */
-
 .scroll-x{
 overflow-x:auto;
 overflow-y:auto;
 width:100%;
 -webkit-overflow-scrolling:touch;
 }
-
-/* table */
 
 table{
 border-collapse:collapse;
@@ -48,8 +44,6 @@ min-width:60px;
 background:white;
 }
 
-/* first column fixed */
-
 .name{
 position:sticky;
 left:0;
@@ -60,16 +54,12 @@ font-weight:bold;
 min-width:90px;
 }
 
-/* header first cell */
-
 th:first-child{
 position:sticky;
 left:0;
 background:#ccc;
 z-index:6;
 }
-
-/* colors */
 
 .ja{background:#8f8;}
 .ev{background:#ff8;}
@@ -91,41 +81,39 @@ padding:2px;
 }
 
 
-/* ---------- MOBILE ---------- */
+/* MOBILE KOMPAKT */
 
 @media (max-width:700px){
 
-body{
-font-size:13px;
-}
+body{font-size:12px;}
 
 td,th{
-min-width:50px;
-padding:3px;
+min-width:45px;
+padding:2px;
 }
 
 .name{
-min-width:80px;
+min-width:70px;
 }
 
 select{
-font-size:14px;
-height:28px;
-padding:1px;
+font-size:12px;
+height:24px;
 }
 
 table{
-min-width:600px;
+min-width:500px;
 }
 
 }
 
 </style>
+
 </head>
 
 <body>
 
-<h2>Goldies Termine</h2>
+<h2>Training</h2>
 
 <div class="scroll-x">
 <table id="t"></table>
@@ -148,7 +136,7 @@ const db = firebase.firestore();
 let data=[];
 
 
-// ---------- autosave ----------
+// ---------- AUTOSAVE ----------
 
 let saveTimer=null;
 
@@ -240,7 +228,7 @@ let cols=data[0].length
 let counts=new Array(cols).fill(0)
 
 
-// header
+// HEADER
 
 let trHead=document.createElement("tr")
 
@@ -250,7 +238,11 @@ let th=document.createElement("th")
 
 let val=data[0][c]||""
 
-th.textContent=val
+if(window.innerWidth < 700){
+th.textContent = val.replace(".2026","")
+}else{
+th.textContent = val
+}
 
 if(isWeekend(val)) th.classList.add("weekend")
 
@@ -261,7 +253,7 @@ trHead.appendChild(th)
 t.appendChild(trHead)
 
 
-// rows
+// DATA
 
 for(let r=1;r<data.length;r++){
 
@@ -275,7 +267,12 @@ let val=data[r][c]||""
 
 if(c===0){
 
-td.textContent=val
+if(window.innerWidth < 700){
+td.textContent = val.split(" ")[0]
+}else{
+td.textContent = val
+}
+
 td.className="name"
 
 }else{
@@ -323,7 +320,7 @@ t.appendChild(tr)
 }
 
 
-// total
+// TOTAL
 
 let trTotal=document.createElement("tr")
 
@@ -350,7 +347,7 @@ trTotal.appendChild(td)
 t.appendChild(trTotal)
 
 
-// header again
+// HEADER AGAIN
 
 let trBottom=document.createElement("tr")
 
@@ -361,8 +358,6 @@ let th=document.createElement("th")
 let val=data[0][c]||""
 
 th.textContent=val
-
-if(isWeekend(val)) th.classList.add("weekend")
 
 trBottom.appendChild(th)
 
@@ -377,25 +372,13 @@ t.appendChild(trBottom)
 
 async function load(){
 
-try{
+// CSV immer laden
 
-let doc=await db.collection("training").doc("list").get()
+data = await loadCSV()
 
-if(doc.exists && doc.data().json){
+// CSV überschreibt Firebase
 
-data=JSON.parse(doc.data().json)
-
-}else{
-
-data=await loadCSV()
-
-}
-
-}catch{
-
-data=await loadCSV()
-
-}
+await save()
 
 draw()
 
