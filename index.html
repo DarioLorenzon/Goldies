@@ -30,18 +30,24 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
+let data = []
 
-// 🔹 IMMER Default Tabelle
 
-let data = [
+// Default Tabelle
 
+function defaultData(){
+
+return [
 ["Name","14.05","21.05","28.05"],
 ["Dario","","",""],
 ["Marco","","",""],
 ["Sven","","",""]
-
 ]
 
+}
+
+
+// Zeichnen
 
 function draw(){
 
@@ -64,6 +70,7 @@ let s=document.createElement("select")
 ;["","ja","ev","nein"].forEach(v=>{
 
 let o=document.createElement("option")
+
 o.value=v
 o.text=v
 
@@ -94,13 +101,50 @@ t.appendChild(tr)
 }
 
 
+// Laden
+
+async function load(){
+
+try{
+
+let doc = await db.collection("training").doc("list").get()
+
+if(doc.exists){
+
+let txt = doc.data().json
+
+data = JSON.parse(txt)
+
+}else{
+
+data = defaultData()
+
+}
+
+draw()
+
+}catch(e){
+
+alert("Load Fehler: "+e)
+
+data = defaultData()
+
+draw()
+
+}
+
+}
+
+
+// Speichern
+
 async function save(){
 
 try{
 
 await db.collection("training").doc("list").set({
 
-data:data
+json: JSON.stringify(data)
 
 })
 
@@ -115,7 +159,7 @@ alert(e)
 }
 
 
-draw()
+load()
 
 </script>
 
