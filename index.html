@@ -10,7 +10,7 @@
 
 <body>
 
-<h2>Firebase Test</h2>
+<h2>Firestore Test</h2>
 
 <div id="status">lädt...</div>
 
@@ -29,7 +29,37 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
-document.getElementById("status").innerText = "Firebase geladen";
+
+async function test(){
+
+try{
+
+const ref = db.collection("training").doc("list")
+
+const snap = await ref.get()
+
+if(snap.exists){
+
+document.getElementById("status").innerText =
+"Daten gefunden"
+
+}else{
+
+document.getElementById("status").innerText =
+"Keine Daten vorhanden"
+
+}
+
+}catch(e){
+
+document.getElementById("status").innerText =
+"Fehler: " + e
+
+}
+
+}
+
+test()
 
 </script>
 
