@@ -9,6 +9,10 @@
 
 <style>
 
+body{
+font-family:Arial;
+}
+
 table{
 border-collapse:collapse;
 }
@@ -33,11 +37,20 @@ width:70px;
 
 <button onclick="save()">Speichern</button>
 
+<br><br>
+
 <table id="tabelle"></table>
 
 <script>
 
-let dataGlobal
+let dataGlobal = []
+
+let token = "HIER_TOKEN"
+let repo = "DarioLorenzon/Goldies"
+let path = "teilnahmen.csv"
+let branch = "main"
+
+
 
 Papa.parse("teilnahmen.csv", {
 
@@ -45,17 +58,25 @@ download:true,
 
 complete:function(res){
 
-dataGlobal=res.data
+dataGlobal = res.data
 
 draw()
+
+},
+
+error:function(err){
+
+alert("CSV Fehler: " + err)
 
 }
 
 })
 
+
+
 function draw(){
 
-let table=document.getElementById("tabelle")
+let table = document.getElementById("tabelle")
 
 table.innerHTML=""
 
@@ -107,18 +128,15 @@ table.appendChild(tr)
 
 }
 
+
+
 async function save(){
 
 let csv=dataGlobal.map(r=>r.join(",")).join("\n")
 
-let token="DEIN_TOKEN"
-let repo="DarioLorenzon/Goldies"
-let path="teilnahmen.csv"
-let branch="main"
-
 try{
 
-// Datei holen
+// Datei laden
 
 let res1 = await fetch(
 `https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`
@@ -127,14 +145,17 @@ let res1 = await fetch(
 let json1 = await res1.json()
 
 if(!json1.sha){
+
 alert("Fehler beim Laden:\n"+JSON.stringify(json1))
 return
+
 }
 
 let sha = json1.sha
 
 
-// UTF-8 richtig encodieren
+// UTF8 encoding
+
 let content = btoa(unescape(encodeURIComponent(csv)))
 
 
@@ -170,7 +191,7 @@ alert("Gespeichert OK")
 
 }else{
 
-alert("Fehler beim Speichern:\n"+JSON.stringify(json2))
+alert("Fehler:\n"+JSON.stringify(json2))
 
 }
 
@@ -179,30 +200,6 @@ alert("Fehler beim Speichern:\n"+JSON.stringify(json2))
 alert("JS Fehler:\n"+e)
 
 }
-
-}
-
-  
-method:"PUT",
-
-headers:{
-Authorization:"token "+token,
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-
-message:"update",
-
-content:btoa(csv),
-
-sha:sha
-
-})
-
-})
-
-alert("Gespeichert")
 
 }
 
