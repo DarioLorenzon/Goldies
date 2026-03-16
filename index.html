@@ -93,32 +93,47 @@ for(let i=0;i<data[r].length;i++){
 
 let td=document.createElement(r==0?"th":"td")
 
-if(r>0 && i>0){
+// Kopfzeile
+if(r===0){
 
-let val=data[r][i]||""
+td.textContent=data[r][i]
+
+}
+
+// Name Spalte
+else if(i===0){
+
+td.textContent=data[r][i]
+
+}
+
+// Dropdown für alle anderen
+else{
+
+let val = data[r][i] ? data[r][i].trim() : ""
 
 let s=document.createElement("select")
 
-;["","ja","ev","nein"].forEach(v=>{
+let options=["","ja","ev","nein"]
+
+for(let v of options){
 
 let o=document.createElement("option")
 
 o.value=v
 o.text=v
 
-if(val==v) o.selected=true
+if(val===v) o.selected=true
 
 s.appendChild(o)
 
-})
+}
 
-s.onchange=()=>data[r][i]=s.value
+s.onchange=()=>{
+data[r][i]=s.value
+}
 
 td.appendChild(s)
-
-}else{
-
-td.textContent=data[r][i]
 
 }
 
