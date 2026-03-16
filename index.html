@@ -23,16 +23,12 @@ h2{
 margin:6px;
 }
 
-/* scroll */
-
 .scroll-x{
 overflow-x:auto;
 overflow-y:auto;
 width:100%;
 -webkit-overflow-scrolling:touch;
 }
-
-/* table */
 
 table{
 border-collapse:collapse;
@@ -48,8 +44,6 @@ min-width:60px;
 background:white;
 }
 
-/* first column fixed */
-
 .name{
 position:sticky;
 left:0;
@@ -57,10 +51,8 @@ background:#f0f0f0;
 z-index:5;
 text-align:left;
 font-weight:bold;
-min-width:90px;
+min-width:100px;
 }
-
-/* header first cell */
 
 th:first-child{
 position:sticky;
@@ -68,8 +60,6 @@ left:0;
 background:#ccc;
 z-index:6;
 }
-
-/* colors */
 
 .ja{background:#8f8;}
 .ev{background:#ff8;}
@@ -91,36 +81,42 @@ padding:2px;
 }
 
 
-/* ---------- MOBILE ---------- */
+/* ===== MOBILE KOMPAKT ===== */
 
 @media (max-width:700px){
 
 body{
-font-size:13px;
+font-size:12px;
 }
 
 td,th{
-min-width:50px;
-padding:3px;
+min-width:42px;
+padding:2px;
 }
 
 .name{
-min-width:80px;
+min-width:70px;
+font-size:12px;
 }
 
 select{
-font-size:14px;
-height:28px;
-padding:1px;
+font-size:12px;
+height:24px;
+padding:0;
 }
 
 table{
-min-width:600px;
+min-width:500px;
+}
+
+.compact th{
+font-size:11px;
 }
 
 }
 
 </style>
+  
 </head>
 
 <body>
