@@ -11,14 +11,14 @@
 <style>
 
 body{
-font-family: Arial;
+font-family:Arial;
 }
 
 table{
-border-collapse: collapse;
+border-collapse:collapse;
 }
 
-td, th{
+td,th{
 border:1px solid #999;
 padding:4px;
 text-align:center;
@@ -48,17 +48,9 @@ background:#ccc;
 z-index:4;
 }
 
-.ja{
-background:#8f8;
-}
-
-.ev{
-background:#ff8;
-}
-
-.nein{
-background:#f88;
-}
+.ja{background:#8f8;}
+.ev{background:#ff8;}
+.nein{background:#f88;}
 
 .count{
 background:#ddd;
@@ -71,11 +63,12 @@ background:#f0f0f0;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<h2>Goldies Termine</h2>
+<h2>Training</h2>
 
 <button onclick="save()">Speichern</button>
 
@@ -84,6 +77,8 @@ background:#f0f0f0;
 <table id="t"></table>
 
 <script>
+
+// ---------- Firebase ----------
 
 const firebaseConfig = {
   apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
@@ -98,7 +93,7 @@ const db = firebase.firestore();
 let data = [];
 
 
-// ---------------- CSV ----------------
+// ---------- CSV ----------
 
 function loadCSV(){
 
@@ -111,39 +106,21 @@ skipEmptyLines:true,
 
 complete:(res)=>{
 
-let rows = res.data
+let rows=res.data
 
-// maximale Spaltenzahl finden
-let maxCols = 0
+let max=0
 
 rows.forEach(r=>{
-if(r.length > maxCols) maxCols = r.length
+if(r.length>max) max=r.length
 })
 
-// alle Zeilen auf gleiche Länge bringen
-rows = rows.map(r=>{
-
-let row = [...r]
-
-while(row.length < maxCols){
-row.push("")
-}
-
-return row
-
+rows=rows.map(r=>{
+while(r.length<max) r.push("")
+return r
 })
-
-console.log("CSV fixed", rows)
 
 resolve(rows)
 
-},
-
-error:(err)=>{
-
-console.log(err)
-resolve([])
-
 }
 
 })
@@ -153,14 +130,14 @@ resolve([])
 }
 
 
-// ---------------- draw ----------------
+// ---------- draw ----------
 
 function draw(){
 
 let t=document.getElementById("t")
 t.innerHTML=""
 
-if(!data || data.length==0) return
+if(!data.length) return
 
 let cols=data[0].length
 
@@ -176,23 +153,18 @@ let td=document.createElement(r==0?"th":"td")
 
 let val=data[r][c]||""
 
-// Kopfzeile
 if(r===0){
 
 td.textContent=val
 
-if(c===0){
-td.className="header-name"
-}
+if(c===0) td.className="header-name"
 
-// Wochenende fett wenn Sa oder So im Text
 if(val.includes("Sa") || val.includes("So")){
 td.classList.add("weekend")
 }
 
 }
 
-// Name Spalte
 else if(c===0){
 
 td.textContent=val
@@ -200,14 +172,13 @@ td.className="name"
 
 }
 
-// Dropdown
 else{
 
 let s=document.createElement("select")
 
 let opts=["","ja","ev","nein"]
 
-for(let v of opts){
+opts.forEach(v=>{
 
 let o=document.createElement("option")
 
@@ -218,7 +189,7 @@ if(val===v) o.selected=true
 
 s.appendChild(o)
 
-}
+})
 
 s.onchange=()=>{
 data[r][c]=s.value
@@ -227,20 +198,13 @@ draw()
 
 td.appendChild(s)
 
-// Farben
-
 if(val==="ja"){
 td.classList.add("ja")
 counts[c]++
 }
 
-if(val==="ev"){
-td.classList.add("ev")
-}
-
-if(val==="nein"){
-td.classList.add("nein")
-}
+if(val==="ev") td.classList.add("ev")
+if(val==="nein") td.classList.add("nein")
 
 }
 
@@ -253,7 +217,7 @@ t.appendChild(tr)
 }
 
 
-// Total Zeile
+// total row
 
 let tr=document.createElement("tr")
 
@@ -281,60 +245,8 @@ t.appendChild(tr)
 
 }
 
-  
-// Farbe
 
-if(val=="ja"){
-td.classList.add("ja")
-counts[c]++
-}
-
-if(val=="ev"){
-td.classList.add("ev")
-}
-
-if(val=="nein"){
-td.classList.add("nein")
-}
-
-
-tr.appendChild(td)
-
-
-t.appendChild(tr)
-
-
-
-
-// Zählzeile
-
-let tr=document.createElement("tr")
-
-for(let c=0;c<data[0].length;c++){
-
-let td=document.createElement("td")
-
-if(c==0){
-
-td.textContent="Total"
-
-}else{
-
-td.textContent=counts[c]
-td.className="count"
-
-}
-
-tr.appendChild(td)
-
-}
-
-t.appendChild(tr)
-
-}
-
-
-// ---------------- load ----------------
+// ---------- load ----------
 
 async function load(){
 
@@ -363,7 +275,7 @@ draw()
 }
 
 
-// ---------------- save ----------------
+// ---------- save ----------
 
 async function save(){
 
