@@ -62,20 +62,27 @@ Papa.parse("./teilnahmen.csv",{
 
 download:true,
 delimiter:";",
-skipEmptyLines:false,
+skipEmptyLines:true,
 
 complete:(res)=>{
 
-console.log("CSV",res.data)
+let cleaned = res.data.map(r => {
 
-resolve(res.data)
+while(r.length && r[r.length-1] === ""){
+r.pop()
+}
+
+return r
+
+})
+
+resolve(cleaned)
 
 },
 
 error:(err)=>{
 
 alert("CSV Fehler "+err)
-
 resolve(defaultData())
 
 }
