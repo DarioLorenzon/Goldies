@@ -10,9 +10,14 @@
 
 <body>
 
-<h2>Firestore Test</h2>
+<h2>Handball Training</h2>
 
-<div id="status">lädt...</div>
+<button onclick="save()">Speichern</button>
+
+<br><br>
+
+<table id="t"></table>
+
 
 <script>
 
@@ -29,8 +34,59 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
+let data = []
 
-async function test(){
+
+// Default Tabelle
+
+function defaultData(){
+
+return [
+["Name","14.05","21.05","28.05"],
+["Dario","","",""],
+["Marco","","",""],
+["Sven","","",""]
+]
+
+}
+
+
+// 🔹 Objekt → Array
+
+function toArray(obj){
+
+let arr=[]
+
+for(let k in obj){
+
+arr.push(obj[k])
+
+}
+
+return arr
+
+}
+
+
+// 🔹 Array → Objekt
+
+function toObject(arr){
+
+let obj={}
+
+arr.forEach((r,i)=>{
+
+obj[i]=r
+
+})
+
+return obj
+
+}
+
+
+
+async function load(){
 
 try{
 
@@ -40,26 +96,117 @@ const snap = await ref.get()
 
 if(snap.exists){
 
-document.getElementById("status").innerText =
-"Daten gefunden"
+let d = snap.data().data
+
+if(d){
+
+data = toArray(d)
 
 }else{
 
-document.getElementById("status").innerText =
-"Keine Daten vorhanden"
+data = defaultData()
 
 }
+
+}else{
+
+data = defaultData()
+
+}
+
+draw()
 
 }catch(e){
 
-document.getElementById("status").innerText =
-"Fehler: " + e
+alert("Load Fehler: "+e)
+
+data = defaultData()
+
+draw()
 
 }
 
 }
 
-test()
+
+
+function draw(){
+
+let t=document.getElementById("t")
+
+t.innerHTML=""
+
+data.forEach((row,r)=>{
+
+let tr=document.createElement("tr")
+
+row.forEach((c,i)=>{
+
+let td=document.createElement(r?"td":"th")
+
+if(r && i){
+
+let s=document.createElement("select")
+
+;["","ja","ev","nein"].forEach(v=>{
+
+let o=document.createElement("option")
+
+o.value=v
+o.text=v
+
+if(c==v) o.selected=true
+
+s.appendChild(o)
+
+})
+
+s.onchange=()=>data[r][i]=s.value
+
+td.appendChild(s)
+
+}else{
+
+td.textContent=c
+
+}
+
+tr.appendChild(td)
+
+})
+
+t.appendChild(tr)
+
+})
+
+}
+
+
+
+async function save(){
+
+try{
+
+const ref=db.collection("training").doc("list")
+
+await ref.set({
+
+data:toObject(data)
+
+})
+
+alert("gespeichert")
+
+}catch(e){
+
+alert("Save Fehler: "+e)
+
+}
+
+}
+
+
+load()
 
 </script>
 
