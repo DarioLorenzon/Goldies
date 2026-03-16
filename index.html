@@ -260,6 +260,7 @@ return date>=today;
 
 // ---------- DRAW ----------
 
+
 function draw(){
 
 let t=document.getElementById("t");
@@ -292,7 +293,7 @@ visibleCols.push(c);
 
 let counts=new Array(data[0].length).fill(0);
 
-for(let r=1;r<data.length;r++){
+for(let r=2;r<data.length;r++){
 
 for(let c=1;c<data[0].length;c++){
 
@@ -306,7 +307,7 @@ if(v==="ja") counts[c]++;
 
 
 
-// ---------- HEADER ----------
+// ---------- HEADER DATUM ----------
 
 let trHead=document.createElement("tr");
 
@@ -327,6 +328,31 @@ trHead.appendChild(th);
 }
 
 t.appendChild(trHead);
+
+
+
+// ---------- HEADER TYP ----------
+
+let trType=document.createElement("tr");
+
+for(let i=0;i<visibleCols.length;i++){
+
+let c=visibleCols[i];
+
+let td=document.createElement("td");
+
+let val=data[1][c]||"";
+
+td.textContent=val;
+
+td.style.fontSize="12px";
+td.style.color="#555";
+
+trType.appendChild(td);
+
+}
+
+t.appendChild(trType);
 
 
 
@@ -358,7 +384,7 @@ t.appendChild(trTotal);
 
 // ---------- ROWS ----------
 
-for(let r=1;r<data.length;r++){
+for(let r=2;r<data.length;r++){
 
 let tr=document.createElement("tr");
 
@@ -438,7 +464,6 @@ trBottom.appendChild(th);
 t.appendChild(trBottom);
 
 }
-
 
 
 // ---------- LOAD ----------
