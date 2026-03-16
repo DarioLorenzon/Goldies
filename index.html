@@ -40,34 +40,26 @@ let data = [];
 
 async function load() {
 
-  try {
+  const ref = db.collection("training").doc("list");
 
-    const ref = db.collection("training").doc("list");
+  const snap = await ref.get();
 
-    const snap = await ref.get();
+  if (snap.exists) {
 
-    if (snap.exists) {
+    data = snap.data().data;
 
-      data = snap.data().data;
+  } else {
 
-    } else {
-
-      data = [
-        ["Name","14.05","21.05","28.05"],
-        ["Dario","","",""],
-        ["Marco","","",""],
-        ["Sven","","",""]
-      ];
-
-    }
-
-    draw();
-
-  } catch (e) {
-
-    alert("Load Fehler: " + e);
+    data = [
+      ["Name","14.05","21.05","28.05"],
+      ["Dario","","",""],
+      ["Marco","","",""],
+      ["Sven","","",""]
+    ];
 
   }
+
+  draw();
 
 }
 
@@ -124,28 +116,71 @@ function draw() {
 }
 
 
-async function save() {
+// 🔹 Array → Objekt umwandeln
+function convertToObject(arr){
 
-  try {
+  let obj={}
 
-    const ref = db.collection("training").doc("list");
+  arr.forEach((row,i)=>{
 
-    await ref.set({
-      data: data
-    });
+    obj[i]=row
 
-    alert("gespeichert OK");
+  })
 
-  } catch (e) {
-
-    alert("Save Fehler: " + e);
-
-  }
+  return obj
 
 }
 
 
-load();
+// 🔹 Objekt → Array
+function convertToArray(obj){
+
+  let arr=[]
+
+  Object.keys(obj).forEach(k=>{
+
+    arr.push(obj[k])
+
+  })
+
+  return arr
+
+}
+
+
+async function save() {
+
+  const ref = db.collection("training").doc("list");
+
+  await ref.set({
+
+    data: convertToObject(data)
+
+  });
+
+  alert("gespeichert");
+
+}
+
+
+async function loadFromDb(){
+
+  const ref = db.collection("training").doc("list");
+
+  const snap = await ref.get();
+
+  if(snap.exists){
+
+    data = convertToArray(snap.data().data)
+
+  }
+
+  draw()
+
+}
+
+
+loadFromDb();
 
 </script>
 
