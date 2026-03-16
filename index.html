@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 
-
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
@@ -13,7 +12,7 @@
 
 <body>
 
-<h2>Termine Goldies</h2>
+<h2>Training</h2>
 
 <button onclick="save()">Speichern</button>
 
@@ -21,7 +20,10 @@
 
 <table id="t"></table>
 
+
 <script>
+
+// ---------------- Firebase ----------------
 
 const firebaseConfig = {
   apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
@@ -33,12 +35,24 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
-let data = [];
+let data = []
 
 
-// Default Tabelle
+// ---------------- Default ----------------
 
-function defaultData() {
+function defaultData(){
+
+return [
+["Name","14.05","21.05","28.05"],
+["Dario","","",""],
+["Marco","","",""],
+["Sven","","",""]
+]
+
+}
+
+
+// ---------------- CSV laden ----------------
 
 function loadCSV(){
 
@@ -52,7 +66,7 @@ skipEmptyLines:false,
 
 complete:(res)=>{
 
-console.log("CSV geladen",res.data)
+console.log("CSV",res.data)
 
 resolve(res.data)
 
@@ -72,124 +86,114 @@ resolve(defaultData())
 
 }
 
-  
-  return [
-    ["Name","14.05","21.05","28.05"],
-    ["Dario","","",""],
-    ["Marco","","",""],
-    ["Sven","","",""]
-  ];
+
+// ---------------- Tabelle zeichnen ----------------
+
+function draw(){
+
+let t=document.getElementById("t")
+
+t.innerHTML=""
+
+data.forEach((row,r)=>{
+
+let tr=document.createElement("tr")
+
+row.forEach((c,i)=>{
+
+let td=document.createElement(r?"td":"th")
+
+if(r && i){
+
+let s=document.createElement("select")
+
+;["","ja","ev","nein"].forEach(v=>{
+
+let o=document.createElement("option")
+
+o.value=v
+o.text=v
+
+if(c==v) o.selected=true
+
+s.appendChild(o)
+
+})
+
+s.onchange=()=>data[r][i]=s.value
+
+td.appendChild(s)
+
+}else{
+
+td.textContent=c
+
+}
+
+tr.appendChild(td)
+
+})
+
+t.appendChild(tr)
+
+})
 
 }
 
 
-// Tabelle zeichnen
+// ---------------- Laden ----------------
 
-function draw() {
+async function load(){
 
-  let t = document.getElementById("t");
+try{
 
-  t.innerHTML = "";
+let doc = await db.collection("training").doc("list").get()
 
-  data.forEach((row, r) => {
+if(doc.exists && doc.data().json){
 
-    let tr = document.createElement("tr");
+data = JSON.parse(doc.data().json)
 
-    row.forEach((c, i) => {
+}else{
 
-      let td = document.createElement(r ? "td" : "th");
+data = await loadCSV()
 
-      if (r && i) {
+}
 
-        let s = document.createElement("select");
+}catch(e){
 
-        ["","ja","ev","nein"].forEach(v => {
+data = await loadCSV()
 
-          let o = document.createElement("option");
+}
 
-          o.value = v;
-          o.text = v;
-
-          if (c == v) o.selected = true;
-
-          s.appendChild(o);
-
-        });
-
-        s.onchange = () => data[r][i] = s.value;
-
-        td.appendChild(s);
-
-      } else {
-
-        td.textContent = c;
-
-      }
-
-      tr.appendChild(td);
-
-    });
-
-    t.appendChild(tr);
-
-  });
+draw()
 
 }
 
 
-// Laden
+// ---------------- Speichern ----------------
 
-async function load() {
+async function save(){
 
-  try {
+try{
 
-    let doc = await db.collection("training").doc("list").get();
+await db.collection("training").doc("list").set({
 
-    if (doc.exists && doc.data().json) {
+json: JSON.stringify(data)
 
-      data = JSON.parse(doc.data().json);
+})
 
-    } else {
+alert("gespeichert")
 
-      data = await loadCSV();
+}catch(e){
 
-    }
+alert(e)
 
-  } catch (e) {
-
-    data = await loadCSV();
-
-  }
-
-  draw();
+}
 
 }
 
 
-// Speichern
-
-async function save() {
-
-  try {
-
-    await db.collection("training").doc("list").set({
-
-      json: JSON.stringify(data)
-
-    });
-
-    alert("gespeichert");
-
-  } catch (e) {
-
-    alert("Save Fehler: " + e);
-
-  }
-
-}
-
-
-load();
+load()
 
 </script>
 
