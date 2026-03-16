@@ -44,22 +44,35 @@ return new Promise((resolve)=>{
 Papa.parse("./teilnahmen.csv",{
 
 download:true,
-delimiter:";",
 skipEmptyLines:true,
 
 complete:(res)=>{
 
-let cleaned = res.data.map(r=>{
+let rows = res.data
 
-while(r.length && r[r.length-1]==""){
-r.pop()
+// maximale Spaltenzahl finden
+let maxCols = 0
+
+rows.forEach(r=>{
+if(r.length > maxCols) maxCols = r.length
+})
+
+// alle Zeilen auf gleiche Länge bringen
+rows = rows.map(r=>{
+
+let row = [...r]
+
+while(row.length < maxCols){
+row.push("")
 }
 
-return r
+return row
 
 })
 
-resolve(cleaned)
+console.log("CSV fixed", rows)
+
+resolve(rows)
 
 },
 
