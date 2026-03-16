@@ -20,10 +20,7 @@
 
 <table id="t"></table>
 
-
 <script>
-
-// ---------------- Firebase ----------------
 
 const firebaseConfig = {
   apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
@@ -35,24 +32,10 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
-let data = []
+let data = [];
 
 
-// ---------------- Default ----------------
-
-function defaultData(){
-
-return [
-["Name","14.05","21.05","28.05"],
-["Dario","","",""],
-["Marco","","",""],
-["Sven","","",""]
-]
-
-}
-
-
-// ---------------- CSV laden ----------------
+// ---------------- CSV ----------------
 
 function loadCSV(){
 
@@ -66,9 +49,9 @@ skipEmptyLines:true,
 
 complete:(res)=>{
 
-let cleaned = res.data.map(r => {
+let cleaned = res.data.map(r=>{
 
-while(r.length && r[r.length-1] === ""){
+while(r.length && r[r.length-1]==""){
 r.pop()
 }
 
@@ -82,8 +65,8 @@ resolve(cleaned)
 
 error:(err)=>{
 
-alert("CSV Fehler "+err)
-resolve(defaultData())
+console.log(err)
+resolve([])
 
 }
 
@@ -94,11 +77,12 @@ resolve(defaultData())
 }
 
 
-// ---------------- Tabelle zeichnen ----------------
+// ---------------- draw ----------------
 
 function draw(){
 
 let t=document.getElementById("t")
+
 t.innerHTML=""
 
 for(let r=0;r<data.length;r++){
@@ -111,13 +95,14 @@ let td=document.createElement(r==0?"th":"td")
 
 if(r>0 && i>0){
 
-let s=document.createElement("select")
-
 let val=data[r][i]||""
+
+let s=document.createElement("select")
 
 ;["","ja","ev","nein"].forEach(v=>{
 
 let o=document.createElement("option")
+
 o.value=v
 o.text=v
 
@@ -127,9 +112,7 @@ s.appendChild(o)
 
 })
 
-s.onchange=()=>{
-data[r][i]=s.value
-}
+s.onchange=()=>data[r][i]=s.value
 
 td.appendChild(s)
 
@@ -149,87 +132,28 @@ t.appendChild(tr)
 
 }
 
-// Name Spalte
-else if(i==0){
 
-td.textContent=c
-
-}
-
-// Auswahlfelder
-else{
-
-let value = c ? c.trim() : ""
-
-let s=document.createElement("select")
-
-;["","ja","ev","nein"].forEach(v=>{
-
-let o=document.createElement("option")
-
-o.value=v
-o.text=v
-
-if(value==v) o.selected=true
-
-s.appendChild(o)
-
-})
-
-s.onchange=()=>{
-
-data[r][i]=s.value
-
-}
-
-td.appendChild(s)
-
-}
-
-tr.appendChild(td)
-
-})
-
-t.appendChild(tr)
-
-})
-
-}
-
-
-// ---------------- Laden ----------------
+// ---------------- load ----------------
 
 async function load(){
 
 try{
 
-// zuerst CSV laden
-
-let csv = await loadCSV()
-
-if(csv && csv.length > 1){
-
-data = csv
-
-}else{
-
-let doc = await db.collection("training").doc("list").get()
+let doc=await db.collection("training").doc("list").get()
 
 if(doc.exists && doc.data().json){
 
-data = JSON.parse(doc.data().json)
+data=JSON.parse(doc.data().json)
 
 }else{
 
-data = defaultData()
+data=await loadCSV()
 
 }
 
-}
+}catch{
 
-}catch(e){
-
-data = defaultData()
+data=await loadCSV()
 
 }
 
@@ -238,25 +162,17 @@ draw()
 }
 
 
-// ---------------- Speichern ----------------
+// ---------------- save ----------------
 
 async function save(){
 
-try{
-
 await db.collection("training").doc("list").set({
 
-json: JSON.stringify(data)
+json:JSON.stringify(data)
 
 })
 
 alert("gespeichert")
-
-}catch(e){
-
-alert(e)
-
-}
 
 }
 
