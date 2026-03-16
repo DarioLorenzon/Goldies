@@ -16,11 +16,11 @@ content="width=device-width, initial-scale=1">
 body{
 margin:0;
 font-family:Arial;
-font-size:16px;
+font-size:14px;
 }
 
 h2{
-margin:8px;
+margin:6px;
 }
 
 /* scroll */
@@ -37,39 +37,18 @@ width:100%;
 table{
 border-collapse:collapse;
 width:max-content;
-min-width:900px;
+min-width:700px;
 }
 
 td,th{
 border:1px solid #999;
-padding:6px;
+padding:4px;
 text-align:center;
-min-width:80px;
+min-width:60px;
 background:white;
 }
 
-/* mobile bigger */
-
-@media (max-width:700px){
-
-td,th{
-min-width:90px;
-padding:8px;
-font-size:16px;
-}
-
-select{
-font-size:18px;
-height:36px;
-}
-
-.name{
-min-width:120px;
-}
-
-}
-
-/* first column */
+/* first column fixed */
 
 .name{
 position:sticky;
@@ -78,9 +57,10 @@ background:#f0f0f0;
 z-index:5;
 text-align:left;
 font-weight:bold;
+min-width:90px;
 }
 
-/* header first */
+/* header first cell */
 
 th:first-child{
 position:sticky;
@@ -106,17 +86,46 @@ background:#f0f0f0;
 }
 
 select{
-font-size:16px;
-padding:4px;
+font-size:14px;
+padding:2px;
+}
+
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width:700px){
+
+body{
+font-size:13px;
+}
+
+td,th{
+min-width:50px;
+padding:3px;
+}
+
+.name{
+min-width:80px;
+}
+
+select{
+font-size:14px;
+height:28px;
+padding:1px;
+}
+
+table{
+min-width:600px;
+}
+
 }
 
 </style>
-
 </head>
 
 <body>
 
-<h2>Training</h2>
+<h2>Goldies Termine</h2>
 
 <div class="scroll-x">
 <table id="t"></table>
