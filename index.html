@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
@@ -13,15 +12,8 @@ content="width=device-width, initial-scale=1">
 
 <style>
 
-body{
-margin:0;
-font-family:Arial;
-font-size:14px;
-}
-
-h2{
-margin:6px;
-}
+body{margin:0;font-family:Arial;font-size:14px;}
+h2{margin:6px;}
 
 .scroll-x{
 overflow-x:auto;
@@ -65,45 +57,16 @@ z-index:6;
 .ev{background:#ff8;}
 .nein{background:#f88;}
 
-.count{
-background:#ddd;
-font-weight:bold;
-}
+.count{background:#ddd;font-weight:bold;}
+.weekend{font-weight:bold;background:#f0f0f0;}
 
-.weekend{
-font-weight:bold;
-background:#f0f0f0;
-}
-
-select{
-font-size:14px;
-padding:2px;
-}
-
-
-/* MOBILE KOMPAKT */
+select{font-size:14px;padding:2px;}
 
 @media (max-width:700px){
 
-body{font-size:12px;}
-
-td,th{
-min-width:45px;
-padding:2px;
-}
-
-.name{
-min-width:70px;
-}
-
-select{
-font-size:12px;
-height:24px;
-}
-
-table{
-min-width:500px;
-}
+td,th{min-width:45px;padding:2px;}
+.name{min-width:70px;}
+table{min-width:500px;}
 
 }
 
@@ -122,32 +85,31 @@ min-width:500px;
 <script>
 
 
-// ---------- Firebase ----------
-
 const firebaseConfig = {
-apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
-authDomain: "goldies-89ea2.firebaseapp.com",
-projectId: "goldies-89ea2"
+apiKey:"AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
+authDomain:"goldies-89ea2.firebaseapp.com",
+projectId:"goldies-89ea2"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 let data=[];
+let initialized=false;
 
 
-// ---------- AUTOSAVE ----------
+// ---------- autosave ----------
 
 let saveTimer=null;
 
 function autoSave(){
 
+if(!initialized) return;
+
 if(saveTimer) clearTimeout(saveTimer);
 
 saveTimer=setTimeout(()=>{
-
 save();
-
 },800);
 
 }
@@ -166,26 +128,26 @@ skipEmptyLines:true,
 
 complete:(res)=>{
 
-let rows=res.data
+let rows=res.data;
 
-let max=0
+let max=0;
 
 rows.forEach(r=>{
-if(r.length>max) max=r.length
-})
+if(r.length>max) max=r.length;
+});
 
 rows=rows.map(r=>{
-while(r.length<max) r.push("")
-return r
-})
+while(r.length<max) r.push("");
+return r;
+});
 
-resolve(rows)
+resolve(rows);
 
 }
 
-})
+});
 
-})
+});
 
 }
 
@@ -194,21 +156,20 @@ resolve(rows)
 
 function isWeekend(text){
 
-if(!text) return false
+if(!text) return false;
 
-let p=text.split(".")
+let p=text.split(".");
+if(p.length<2) return false;
 
-if(p.length<2) return false
+let d=parseInt(p[0]);
+let m=parseInt(p[1])-1;
+let y=2026;
 
-let d=parseInt(p[0])
-let m=parseInt(p[1])-1
-let y=2026
+let dt=new Date(y,m,d);
 
-let dt=new Date(y,m,d)
+let day=dt.getDay();
 
-let day=dt.getDay()
-
-return day===0 || day===6
+return day===0 || day===6;
 
 }
 
@@ -217,153 +178,111 @@ return day===0 || day===6
 
 function draw(){
 
-let t=document.getElementById("t")
+let t=document.getElementById("t");
+t.innerHTML="";
 
-t.innerHTML=""
+if(!data.length) return;
 
-if(!data.length) return
-
-let cols=data[0].length
-
-let counts=new Array(cols).fill(0)
+let cols=data[0].length;
+let counts=new Array(cols).fill(0);
 
 
-// HEADER
+// header
 
-let trHead=document.createElement("tr")
+let trHead=document.createElement("tr");
 
 for(let c=0;c<cols;c++){
 
-let th=document.createElement("th")
+let th=document.createElement("th");
+let val=data[0][c]||"";
 
-let val=data[0][c]||""
+th.textContent=val;
 
-if(window.innerWidth < 700){
-th.textContent = val.replace(".2026","")
-}else{
-th.textContent = val
-}
+if(isWeekend(val)) th.classList.add("weekend");
 
-if(isWeekend(val)) th.classList.add("weekend")
-
-trHead.appendChild(th)
+trHead.appendChild(th);
 
 }
 
-t.appendChild(trHead)
+t.appendChild(trHead);
 
 
-// DATA
+// rows
 
 for(let r=1;r<data.length;r++){
 
-let tr=document.createElement("tr")
+let tr=document.createElement("tr");
 
 for(let c=0;c<cols;c++){
 
-let td=document.createElement("td")
-
-let val=data[r][c]||""
+let td=document.createElement("td");
+let val=data[r][c]||"";
 
 if(c===0){
 
-if(window.innerWidth < 700){
-td.textContent = val.split(" ")[0]
-}else{
-td.textContent = val
-}
-
-td.className="name"
+td.textContent=val;
+td.className="name";
 
 }else{
 
-let s=document.createElement("select")
+let s=document.createElement("select");
 
-let opts=["","ja","ev","nein"]
+["","ja","ev","nein"].forEach(v=>{
 
-opts.forEach(v=>{
+let o=document.createElement("option");
+o.value=v;
+o.text=v;
 
-let o=document.createElement("option")
-o.value=v
-o.text=v
+if(val===v) o.selected=true;
 
-if(val===v) o.selected=true
+s.appendChild(o);
 
-s.appendChild(o)
-
-})
+});
 
 s.onchange=()=>{
-data[r][c]=s.value
-draw()
-autoSave()
-}
+data[r][c]=s.value;
+draw();
+autoSave();
+};
 
-td.appendChild(s)
+td.appendChild(s);
 
-if(val==="ja"){
-td.classList.add("ja")
-counts[c]++
-}
-
-if(val==="ev") td.classList.add("ev")
-if(val==="nein") td.classList.add("nein")
+if(val==="ja"){td.classList.add("ja");counts[c]++;}
+if(val==="ev") td.classList.add("ev");
+if(val==="nein") td.classList.add("nein");
 
 }
 
-tr.appendChild(td)
+tr.appendChild(td);
 
 }
 
-t.appendChild(tr)
+t.appendChild(tr);
 
 }
 
 
-// TOTAL
+// total
 
-let trTotal=document.createElement("tr")
+let trTotal=document.createElement("tr");
 
 for(let c=0;c<cols;c++){
 
-let td=document.createElement("td")
+let td=document.createElement("td");
 
 if(c===0){
-
-td.textContent="Total"
-td.className="name"
-
+td.textContent="Total";
+td.className="name";
 }else{
+td.textContent=counts[c];
+td.className="count";
+}
 
-td.textContent=counts[c]
-td.className="count"
+trTotal.appendChild(td);
 
 }
 
-trTotal.appendChild(td)
-
-}
-
-t.appendChild(trTotal)
-
-
-// HEADER AGAIN
-
-let trBottom=document.createElement("tr")
-
-for(let c=0;c<cols;c++){
-
-let th=document.createElement("th")
-
-let val=data[0][c]||""
-
-th.textContent=val
-
-trBottom.appendChild(th)
-
-}
-
-t.appendChild(trBottom)
+t.appendChild(trTotal);
 
 }
 
@@ -372,15 +291,38 @@ t.appendChild(trBottom)
 
 async function load(){
 
-// CSV immer laden
+// CSV laden
+let csv = await loadCSV();
 
-data = await loadCSV()
+// Firebase laden
+let dbData=null;
 
-// CSV überschreibt Firebase
+try{
 
-await save()
+let doc=await db.collection("training").doc("list").get();
 
-draw()
+if(doc.exists && doc.data().json){
+dbData=JSON.parse(doc.data().json);
+}
+
+}catch(e){}
+
+// wenn Firebase leer → CSV übernehmen
+
+if(!dbData){
+
+data=csv;
+await save();
+
+}else{
+
+data=dbData;
+
+}
+
+initialized=true;
+
+draw();
 
 }
 
@@ -390,15 +332,13 @@ draw()
 async function save(){
 
 await db.collection("training").doc("list").set({
-
 json:JSON.stringify(data)
-
-})
+});
 
 }
 
 
-load()
+load();
 
 </script>
 
