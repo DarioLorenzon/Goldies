@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-content="width=device-width, initial-scale=1, maximum-scale=1">
+content="width=device-width, initial-scale=1">
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
@@ -16,6 +16,7 @@ content="width=device-width, initial-scale=1, maximum-scale=1">
 body{
 margin:0;
 font-family:Arial;
+font-size:16px;
 }
 
 h2{
@@ -41,13 +42,34 @@ min-width:900px;
 
 td,th{
 border:1px solid #999;
-padding:4px;
+padding:6px;
 text-align:center;
-min-width:70px;
+min-width:80px;
 background:white;
 }
 
-/* first column fixed */
+/* mobile bigger */
+
+@media (max-width:700px){
+
+td,th{
+min-width:90px;
+padding:8px;
+font-size:16px;
+}
+
+select{
+font-size:18px;
+height:36px;
+}
+
+.name{
+min-width:120px;
+}
+
+}
+
+/* first column */
 
 .name{
 position:sticky;
@@ -55,9 +77,10 @@ left:0;
 background:#f0f0f0;
 z-index:5;
 text-align:left;
+font-weight:bold;
 }
 
-/* header first cell */
+/* header first */
 
 th:first-child{
 position:sticky;
@@ -84,6 +107,7 @@ background:#f0f0f0;
 
 select{
 font-size:16px;
+padding:4px;
 }
 
 </style>
@@ -92,7 +116,7 @@ font-size:16px;
 
 <body>
 
-<h2>Goldies Termine</h2>
+<h2>Training</h2>
 
 <div class="scroll-x">
 <table id="t"></table>
@@ -115,7 +139,7 @@ const db = firebase.firestore();
 let data=[];
 
 
-// ---------- AUTOSAVE ----------
+// ---------- autosave ----------
 
 let saveTimer=null;
 
@@ -207,7 +231,7 @@ let cols=data[0].length
 let counts=new Array(cols).fill(0)
 
 
-// HEADER
+// header
 
 let trHead=document.createElement("tr")
 
@@ -228,7 +252,7 @@ trHead.appendChild(th)
 t.appendChild(trHead)
 
 
-// DATA
+// rows
 
 for(let r=1;r<data.length;r++){
 
@@ -254,7 +278,6 @@ let opts=["","ja","ev","nein"]
 opts.forEach(v=>{
 
 let o=document.createElement("option")
-
 o.value=v
 o.text=v
 
@@ -291,7 +314,7 @@ t.appendChild(tr)
 }
 
 
-// TOTAL
+// total
 
 let trTotal=document.createElement("tr")
 
@@ -318,7 +341,7 @@ trTotal.appendChild(td)
 t.appendChild(trTotal)
 
 
-// HEADER AGAIN
+// header again
 
 let trBottom=document.createElement("tr")
 
