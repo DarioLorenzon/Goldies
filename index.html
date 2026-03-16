@@ -10,32 +10,29 @@
 
 <style>
 
-html, body{
-height:100%;
+body{
 margin:0;
 font-family:Arial;
-overflow:hidden;
 }
 
 h2{
 margin:8px;
 }
 
-/* scroll container */
+/* Scroll Container */
 
 .table-wrap{
 overflow:auto;
+height:80vh;
 width:100%;
-max-height:calc(100vh - 120px);
 -webkit-overflow-scrolling:touch;
-border:1px solid #999;
 }
 
-/* table */
+/* Table */
 
 table{
 border-collapse:collapse;
-min-width:900px;
+min-width:1000px;
 }
 
 td,th{
@@ -46,7 +43,7 @@ min-width:70px;
 background:white;
 }
 
-/* header */
+/* Header */
 
 th{
 position:sticky;
@@ -55,7 +52,7 @@ background:#ddd;
 z-index:3;
 }
 
-/* first column */
+/* First column */
 
 .name{
 position:sticky;
@@ -65,17 +62,17 @@ z-index:2;
 text-align:left;
 }
 
-/* corner */
+/* Top left */
 
 .header-name{
 position:sticky;
 top:0;
 left:0;
 background:#ccc;
-z-index:5;
+z-index:4;
 }
 
-/* colors */
+/* Colors */
 
 .ja{background:#8f8;}
 .ev{background:#ff8;}
@@ -93,7 +90,6 @@ background:#f0f0f0;
 
 select{
 font-size:16px;
-padding:4px;
 }
 
 </style>
@@ -112,9 +108,6 @@ padding:4px;
 
 <script>
 
-
-// ---------- Firebase ----------
-
 const firebaseConfig = {
   apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
   authDomain: "goldies-89ea2.firebaseapp.com",
@@ -124,10 +117,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-let data = [];
+let data=[];
 
 
-// ---------- CSV ----------
+// CSV
 
 function loadCSV(){
 
@@ -164,7 +157,7 @@ resolve(rows)
 }
 
 
-// ---------- weekend ----------
+// weekend
 
 function isWeekend(text){
 
@@ -187,7 +180,7 @@ return day===0 || day===6
 }
 
 
-// ---------- draw ----------
+// draw
 
 function draw(){
 
@@ -275,7 +268,7 @@ t.appendChild(tr)
 }
 
 
-// total row
+// total
 
 let tr=document.createElement("tr")
 
@@ -304,7 +297,7 @@ t.appendChild(tr)
 }
 
 
-// ---------- load ----------
+// load
 
 async function load(){
 
@@ -333,7 +326,7 @@ draw()
 }
 
 
-// ---------- save ----------
+// save
 
 async function save(){
 
@@ -346,7 +339,6 @@ json:JSON.stringify(data)
 alert("gespeichert")
 
 }
-
 
 load()
 
