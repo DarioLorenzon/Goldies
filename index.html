@@ -186,7 +186,7 @@ return day===0 || day===6
 
 }
 
-
+  
 // ---------- draw ----------
 
 function draw(){
@@ -265,6 +265,7 @@ s.appendChild(o)
 s.onchange=()=>{
 data[r][c]=s.value
 draw()
+autoSave()
 }
 
 td.appendChild(s)
@@ -366,6 +367,20 @@ data=await loadCSV()
 
 }
 
+let saveTimer=null
+
+function autoSave(){
+
+if(saveTimer) clearTimeout(saveTimer)
+
+saveTimer=setTimeout(()=>{
+
+save()
+
+},800)
+
+}
+  
 draw()
 
 }
