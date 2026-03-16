@@ -63,11 +63,9 @@ z-index:6;
 select{font-size:14px;padding:2px;}
 
 @media (max-width:700px){
-
 td,th{min-width:45px;padding:2px;}
 .name{min-width:70px;}
 table{min-width:500px;}
-
 }
 
 </style>
@@ -98,7 +96,7 @@ let data=[];
 let initialized=false;
 
 
-// ---------- autosave ----------
+// ---------- AUTOSAVE ----------
 
 let saveTimer=null;
 
@@ -148,6 +146,48 @@ resolve(rows);
 });
 
 });
+
+}
+
+
+// ---------- MERGE ----------
+
+function mergeData(csv, db){
+
+let result=[];
+
+let rows = csv.length;
+let cols = csv[0].length;
+
+for(let r=0;r<rows;r++){
+
+result[r]=[];
+
+for(let c=0;c<cols;c++){
+
+let csvVal = csv[r]?.[c] ?? "";
+let dbVal  = db?.[r]?.[c] ?? "";
+
+// header
+if(r===0){
+result[r][c]=csvVal;
+}
+
+// name
+else if(c===0){
+result[r][c]=csvVal;
+}
+
+// values
+else{
+result[r][c]=dbVal || "";
+}
+
+}
+
+}
+
+return result;
 
 }
 
@@ -284,6 +324,22 @@ trTotal.appendChild(td);
 
 t.appendChild(trTotal);
 
+
+// header again
+
+let trBottom=document.createElement("tr");
+
+for(let c=0;c<cols;c++){
+
+let th=document.createElement("th");
+th.textContent=data[0][c]||"";
+
+trBottom.appendChild(th);
+
+}
+
+t.appendChild(trBottom);
+
 }
 
 
@@ -291,10 +347,8 @@ t.appendChild(trTotal);
 
 async function load(){
 
-// CSV laden
 let csv = await loadCSV();
 
-// Firebase laden
 let dbData=null;
 
 try{
@@ -307,18 +361,11 @@ dbData=JSON.parse(doc.data().json);
 
 }catch(e){}
 
-// wenn Firebase leer → CSV übernehmen
+// merge + löschen
 
-if(!dbData){
+data = mergeData(csv, dbData);
 
-data=csv;
 await save();
-
-}else{
-
-data=dbData;
-
-}
 
 initialized=true;
 
