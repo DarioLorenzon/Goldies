@@ -25,14 +25,14 @@ width:100%;
 table{
 border-collapse:collapse;
 width:max-content;
-min-width:700px;
+min-width:600px;
 }
 
 td,th{
 border:1px solid #999;
 padding:4px;
 text-align:center;
-min-width:60px;
+min-width:55px;
 background:white;
 }
 
@@ -64,12 +64,14 @@ background:#e6ccff;
 font-weight:bold;
 }
 
-select{font-size:14px;padding:2px;}
+select{
+font-size:14px;
+padding:2px;
+}
 
 @media (max-width:700px){
 td,th{min-width:45px;padding:2px;}
 .name{min-width:70px;}
-table{min-width:500px;}
 }
 
 </style>
@@ -78,7 +80,7 @@ table{min-width:500px;}
 
 <body>
 
-<h2>Training</h2>
+<h2>Goldies Termine</h2>
 
 <div class="scroll-x">
 <table id="t"></table>
@@ -99,6 +101,7 @@ let data=[];
 let initialized=false;
 
 
+
 // ---------- AUTOSAVE ----------
 
 let saveTimer=null;
@@ -109,11 +112,10 @@ if(!initialized) return;
 
 if(saveTimer) clearTimeout(saveTimer);
 
-saveTimer=setTimeout(()=>{
-save();
-},800);
+saveTimer=setTimeout(()=>save(),800);
 
 }
+
 
 
 // ---------- CSV ----------
@@ -153,14 +155,15 @@ resolve(rows);
 }
 
 
+
 // ---------- MERGE ----------
 
 function mergeData(csv, db){
 
 let result=[];
 
-let rows = csv.length;
-let cols = csv[0].length;
+let rows=csv.length;
+let cols=csv[0].length;
 
 for(let r=0;r<rows;r++){
 
@@ -168,18 +171,12 @@ result[r]=[];
 
 for(let c=0;c<cols;c++){
 
-let csvVal = csv[r]?.[c] ?? "";
-let dbVal  = db?.[r]?.[c] ?? "";
+let csvVal=csv[r]?.[c] ?? "";
+let dbVal=db?.[r]?.[c] ?? "";
 
-if(r===0){
-result[r][c]=csvVal;
-}
-else if(c===0){
-result[r][c]=csvVal;
-}
-else{
-result[r][c]=dbVal || "";
-}
+if(r===0) result[r][c]=csvVal;
+else if(c===0) result[r][c]=csvVal;
+else result[r][c]=dbVal;
 
 }
 
@@ -190,29 +187,46 @@ return result;
 }
 
 
-// ---------- weekend ----------
+
+// ---------- DATE HELPERS ----------
 
 function isWeekend(text){
-
-if(!text) return false;
 
 let p=text.split(".");
 if(p.length<2) return false;
 
 let d=parseInt(p[0]);
 let m=parseInt(p[1])-1;
-let y=2026;
 
-let dt=new Date(y,m,d);
+let date=new Date(2026,m,d);
 
-let day=dt.getDay();
+let day=date.getDay();
 
 return day===0 || day===6;
 
 }
 
 
-// ---------- draw ----------
+function isFutureOrToday(text){
+
+let p=text.split(".");
+if(p.length<2) return true;
+
+let d=parseInt(p[0]);
+let m=parseInt(p[1])-1;
+
+let date=new Date(2026,m,d);
+
+let today=new Date();
+today.setHours(0,0,0,0);
+
+return date>=today;
+
+}
+
+
+
+// ---------- DRAW ----------
 
 function draw(){
 
@@ -221,15 +235,37 @@ t.innerHTML="";
 
 if(!data.length) return;
 
-let cols=data[0].length;
-let counts=new Array(cols).fill(0);
+
+// sichtbare Spalten
+
+let visibleCols=[];
+
+for(let c=0;c<data[0].length;c++){
+
+if(c===0){
+visibleCols.push(c);
+continue;
+}
+
+let val=data[0][c];
+
+if(isFutureOrToday(val)){
+visibleCols.push(c);
+}
+
+}
+
+
+let counts=new Array(data[0].length).fill(0);
 
 
 // HEADER
 
 let trHead=document.createElement("tr");
 
-for(let c=0;c<cols;c++){
+for(let i=0;i<visibleCols.length;i++){
+
+let c=visibleCols[i];
 
 let th=document.createElement("th");
 
@@ -237,9 +273,7 @@ let val=data[0][c]||"";
 
 th.textContent=val;
 
-if(isWeekend(val)){
-th.classList.add("weekend");
-}
+if(isWeekend(val)) th.classList.add("weekend");
 
 trHead.appendChild(th);
 
@@ -248,13 +282,16 @@ trHead.appendChild(th);
 t.appendChild(trHead);
 
 
-// DATA
+
+// ROWS
 
 for(let r=1;r<data.length;r++){
 
 let tr=document.createElement("tr");
 
-for(let c=0;c<cols;c++){
+for(let i=0;i<visibleCols.length;i++){
+
+let c=visibleCols[i];
 
 let td=document.createElement("td");
 
@@ -304,20 +341,27 @@ t.appendChild(tr);
 }
 
 
+
 // TOTAL
 
 let trTotal=document.createElement("tr");
 
-for(let c=0;c<cols;c++){
+for(let i=0;i<visibleCols.length;i++){
+
+let c=visibleCols[i];
 
 let td=document.createElement("td");
 
 if(c===0){
+
 td.textContent="Total";
 td.className="name";
+
 }else{
+
 td.textContent=counts[c];
 td.className="count";
+
 }
 
 trTotal.appendChild(td);
@@ -327,11 +371,14 @@ trTotal.appendChild(td);
 t.appendChild(trTotal);
 
 
-// HEADER AGAIN (unten)
+
+// HEADER UNTEN
 
 let trBottom=document.createElement("tr");
 
-for(let c=0;c<cols;c++){
+for(let i=0;i<visibleCols.length;i++){
+
+let c=visibleCols[i];
 
 let th=document.createElement("th");
 
@@ -339,9 +386,7 @@ let val=data[0][c]||"";
 
 th.textContent=val;
 
-if(isWeekend(val)){
-th.classList.add("weekend");
-}
+if(isWeekend(val)) th.classList.add("weekend");
 
 trBottom.appendChild(th);
 
@@ -352,11 +397,12 @@ t.appendChild(trBottom);
 }
 
 
-// ---------- load ----------
+
+// ---------- LOAD ----------
 
 async function load(){
 
-let csv = await loadCSV();
+let csv=await loadCSV();
 
 let dbData=null;
 
@@ -364,13 +410,13 @@ try{
 
 let doc=await db.collection("training").doc("list").get();
 
-if(doc.exists && doc.data().json){
+if(doc.exists){
 dbData=JSON.parse(doc.data().json);
 }
 
 }catch(e){}
 
-data = mergeData(csv, dbData);
+data=mergeData(csv,dbData);
 
 await save();
 
@@ -381,7 +427,8 @@ draw();
 }
 
 
-// ---------- save ----------
+
+// ---------- SAVE ----------
 
 async function save(){
 
