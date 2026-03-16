@@ -10,7 +10,7 @@
 
 <body>
 
-<h2>Handball Training</h2>
+<h2>Training</h2>
 
 <button onclick="save()">Speichern</button>
 
@@ -18,116 +18,29 @@
 
 <table id="t"></table>
 
-
 <script>
 
 const firebaseConfig = {
   apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
   authDomain: "goldies-89ea2.firebaseapp.com",
-  projectId: "goldies-89ea2",
-  storageBucket: "goldies-89ea2.firebasestorage.app",
-  messagingSenderId: "210598012879",
-  appId: "1:210598012879:web:dca79e3e3eb237e5bb14ba"
+  projectId: "goldies-89ea2"
 };
 
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
-let data = []
 
+// 🔹 IMMER Default Tabelle
 
-// Default Tabelle
+let data = [
 
-function defaultData(){
-
-return [
 ["Name","14.05","21.05","28.05"],
 ["Dario","","",""],
 ["Marco","","",""],
 ["Sven","","",""]
+
 ]
-
-}
-
-
-// 🔹 Objekt → Array
-
-function toArray(obj){
-
-let arr=[]
-
-for(let k in obj){
-
-arr.push(obj[k])
-
-}
-
-return arr
-
-}
-
-
-// 🔹 Array → Objekt
-
-function toObject(arr){
-
-let obj={}
-
-arr.forEach((r,i)=>{
-
-obj[i]=r
-
-})
-
-return obj
-
-}
-
-
-
-async function load(){
-
-try{
-
-const ref = db.collection("training").doc("list")
-
-const snap = await ref.get()
-
-if(snap.exists){
-
-let d = snap.data().data
-
-if(d){
-
-data = toArray(d)
-
-}else{
-
-data = defaultData()
-
-}
-
-}else{
-
-data = defaultData()
-
-}
-
-draw()
-
-}catch(e){
-
-alert("Load Fehler: "+e)
-
-data = defaultData()
-
-draw()
-
-}
-
-}
-
 
 
 function draw(){
@@ -151,7 +64,6 @@ let s=document.createElement("select")
 ;["","ja","ev","nein"].forEach(v=>{
 
 let o=document.createElement("option")
-
 o.value=v
 o.text=v
 
@@ -182,16 +94,13 @@ t.appendChild(tr)
 }
 
 
-
 async function save(){
 
 try{
 
-const ref=db.collection("training").doc("list")
+await db.collection("training").doc("list").set({
 
-await ref.set({
-
-data:toObject(data)
+data:data
 
 })
 
@@ -199,14 +108,14 @@ alert("gespeichert")
 
 }catch(e){
 
-alert("Save Fehler: "+e)
+alert(e)
 
 }
 
 }
 
 
-load()
+draw()
 
 </script>
 
