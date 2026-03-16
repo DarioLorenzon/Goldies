@@ -80,7 +80,7 @@ td,th{min-width:45px;padding:2px;}
 
 <body>
 
-<h2>Training</h2>
+<h2>Goldies Termine</h2>
 
 <div class="scroll-x">
 <table id="t"></table>
@@ -281,6 +281,30 @@ trHead.appendChild(th);
 
 t.appendChild(trHead);
 
+// TOTAL
+
+let trTotal=document.createElement("tr");
+
+for(let i=0;i<visibleCols.length;i++){
+
+let c=visibleCols[i];
+
+let td=document.createElement("td");
+
+if(c===0){
+td.textContent="Total";
+td.className="name";
+}else{
+td.textContent=counts[c];
+td.className="count";
+}
+
+trTotal.appendChild(td);
+
+}
+
+t.appendChild(trTotal);
+
 
 // ROWS
 
@@ -338,31 +362,6 @@ tr.appendChild(td);
 t.appendChild(tr);
 
 }
-
-
-// TOTAL
-
-let trTotal=document.createElement("tr");
-
-for(let i=0;i<visibleCols.length;i++){
-
-let c=visibleCols[i];
-
-let td=document.createElement("td");
-
-if(c===0){
-td.textContent="Total";
-td.className="name";
-}else{
-td.textContent=counts[c];
-td.className="count";
-}
-
-trTotal.appendChild(td);
-
-}
-
-t.appendChild(trTotal);
 
 
 // HEADER UNTEN
