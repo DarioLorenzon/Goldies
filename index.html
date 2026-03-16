@@ -19,20 +19,27 @@ h2{
 margin:8px;
 }
 
-/* nur horizontal scroll */
+/* OUTER WRAPPER */
 
-.table-wrap{
+.scroll-x{
 overflow-x:auto;
-overflow-y:visible;
 width:100%;
 -webkit-overflow-scrolling:touch;
+}
+
+/* INNER WRAPPER */
+
+.scroll-y{
+overflow-y:auto;
+max-height:80vh;
 }
 
 /* table */
 
 table{
 border-collapse:collapse;
-min-width:1200px;
+width:max-content;
+min-width:100%;
 }
 
 td,th{
@@ -66,10 +73,10 @@ text-align:left;
 
 .header-name{
 position:sticky;
-left:0;
 top:0;
+left:0;
 background:#ccc;
-z-index:4;
+z-index:5;
 }
 
 /* colors */
@@ -102,8 +109,10 @@ font-size:16px;
 
 <button onclick="save()">Speichern</button>
 
-<div class="table-wrap">
+<div class="scroll-x">
+<div class="scroll-y">
 <table id="t"></table>
+</div>
 </div>
 
 <script>
@@ -118,9 +127,6 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 let data=[];
-
-
-// CSV
 
 function loadCSV(){
 
@@ -156,9 +162,6 @@ resolve(rows)
 
 }
 
-
-// weekend
-
 function isWeekend(text){
 
 if(!text) return false
@@ -179,13 +182,9 @@ return day===0 || day===6
 
 }
 
-
-// draw
-
 function draw(){
 
 let t=document.getElementById("t")
-
 t.innerHTML=""
 
 if(!data.length) return
@@ -210,9 +209,7 @@ td.textContent=val
 
 if(c===0) td.className="header-name"
 
-if(isWeekend(val)){
-td.classList.add("weekend")
-}
+if(isWeekend(val)) td.classList.add("weekend")
 
 }
 
@@ -267,9 +264,6 @@ t.appendChild(tr)
 
 }
 
-
-// total
-
 let tr=document.createElement("tr")
 
 for(let c=0;c<cols;c++){
@@ -296,9 +290,6 @@ t.appendChild(tr)
 
 }
 
-
-// load
-
 async function load(){
 
 try{
@@ -324,9 +315,6 @@ data=await loadCSV()
 draw()
 
 }
-
-
-// save
 
 async function save(){
 
