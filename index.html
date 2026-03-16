@@ -109,15 +109,27 @@ try{
 
 let doc = await db.collection("training").doc("list").get()
 
-if(doc.exists){
+if(doc.exists && doc.data().json){
 
-let txt = doc.data().json
-
-data = JSON.parse(txt)
+data = JSON.parse(doc.data().json)
 
 }else{
 
 data = defaultData()
+
+}
+
+draw()
+
+}catch(e){
+
+alert("Load Fehler: "+e)
+
+data = defaultData()
+
+draw()
+
+}
 
 }
 
