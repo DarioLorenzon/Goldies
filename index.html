@@ -336,15 +336,21 @@ let trBottom=document.createElement("tr");
 for(let c=0;c<cols;c++){
 
 let th=document.createElement("th");
-th.textContent=data[0][c]||"";
+
+let val = data[0][c] || "";
+
+th.textContent = val;
+
+// Wochenende auch unten markieren
+if(isWeekend(val)){
+th.classList.add("weekend");
+}
 
 trBottom.appendChild(th);
 
 }
 
 t.appendChild(trBottom);
-
-}
 
 
 // ---------- load ----------
