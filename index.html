@@ -1,120 +1,77 @@
 <!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
+
 <meta charset="UTF-8">
 
-<title>Handball Training</title>
-
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
-<style>
-
-body{
-font-family:Arial;
-}
-
-table{
-border-collapse:collapse;
-}
-
-td,th{
-border:1px solid #999;
-padding:5px;
-text-align:center;
-}
-
-select{
-width:70px;
-}
-
-</style>
 
 </head>
 
 <body>
 
-<h2>Handball Trainingsübersicht</h2>
+<h2>Training</h2>
 
 <button onclick="save()">Speichern</button>
 
-<br><br>
-
-<table id="tabelle"></table>
+<table id="t"></table>
 
 <script>
 
-let dataGlobal = []
+let data=[]
 
-let token = "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"
-let repo = "DarioLorenzon/Goldies"
-let path = "teilnahmen.csv"
-let branch = "main"
-
-
-
-Papa.parse("teilnahmen.csv", {
+Papa.parse("teilnahmen.csv",{
 
 download:true,
 
-complete:function(res){
+complete:r=>{
 
-dataGlobal = res.data
+data=r.data
 
 draw()
 
-},
-
-error:function(err){
-
-alert("CSV Fehler: " + err)
-
 }
 
 })
-
-
 
 function draw(){
 
-let table = document.getElementById("tabelle")
+let t=document.getElementById("t")
 
-table.innerHTML=""
+t.innerHTML=""
 
-dataGlobal.forEach((row,r)=>{
+data.forEach((row,r)=>{
 
 let tr=document.createElement("tr")
 
-row.forEach((cell,c)=>{
+row.forEach((c,i)=>{
 
-let td=document.createElement(r==0?"th":"td")
+let td=document.createElement(r? "td":"th")
 
-if(r>0 && c>0){
+if(r&&i){
 
-let sel=document.createElement("select")
+let s=document.createElement("select")
 
-;["","ja","ev.","nein"].forEach(v=>{
+;["","ja","ev","nein"].forEach(v=>{
 
 let o=document.createElement("option")
-o.value=v
+
 o.text=v
+o.value=v
 
-if(cell==v) o.selected=true
+if(c==v) o.selected=true
 
-sel.appendChild(o)
+s.appendChild(o)
 
 })
 
-sel.onchange=()=>{
+s.onchange=()=>data[r][i]=s.value
 
-dataGlobal[r][c]=sel.value
-
-}
-
-td.appendChild(sel)
+td.appendChild(s)
 
 }else{
 
-td.textContent=cell
+td.textContent=c
 
 }
 
@@ -122,84 +79,33 @@ tr.appendChild(td)
 
 })
 
-table.appendChild(tr)
+t.appendChild(tr)
 
 })
 
 }
 
+function save(){
 
+let csv=data.map(r=>r.join(",")).join("\n")
 
-async function save(){
-
-let csv=dataGlobal.map(r=>r.join(",")).join("\n")
-
-try{
-
-// Datei laden
-
-let res1 = await fetch(
-`https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`
-)
-
-let json1 = await res1.json()
-
-if(!json1.sha){
-
-alert("Fehler beim Laden:\n"+JSON.stringify(json1))
-return
-
-}
-
-let sha = json1.sha
-
-
-// UTF8 encoding
-
-let content = btoa(unescape(encodeURIComponent(csv)))
-
-
-// speichern
-
-let res2 = await fetch(
-`https://api.github.com/repos/${repo}/contents/${path}`,
+fetch(
+"https://api.github.com/repos/DarioLorenzon/Goldies/issues",
 {
-method:"PUT",
-
+method:"POST",
 headers:{
-Authorization:"token "+token,
-"Content-Type":"application/json"
+Accept:"application/vnd.github+json"
 },
-
 body:JSON.stringify({
 
-message:"update teilnahmen",
-content:content,
-sha:sha,
-branch:branch
+title:"save",
+body:csv
 
 })
-
 }
 )
 
-let json2 = await res2.json()
-
-if(json2.commit){
-
-alert("Gespeichert OK")
-
-}else{
-
-alert("Fehler:\n"+JSON.stringify(json2))
-
-}
-
-}catch(e){
-
-alert("JS Fehler:\n"+e)
-
-}
+alert("gesendet")
 
 }
 
