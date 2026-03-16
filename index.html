@@ -28,8 +28,7 @@ const firebaseConfig = {
   projectId: "goldies-89ea2",
   storageBucket: "goldies-89ea2.firebasestorage.app",
   messagingSenderId: "210598012879",
-  appId: "1:210598012879:web:dca79e3e3eb237e5bb14ba",
-  measurementId: "G-2T3PTP7J0Z"
+  appId: "1:210598012879:web:dca79e3e3eb237e5bb14ba"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -41,26 +40,34 @@ let data = [];
 
 async function load() {
 
-  const ref = db.collection("training").doc("list");
+  try {
 
-  const snap = await ref.get();
+    const ref = db.collection("training").doc("list");
 
-  if (snap.exists) {
+    const snap = await ref.get();
 
-    data = snap.data().data;
+    if (snap.exists) {
 
-  } else {
+      data = snap.data().data;
 
-    data = [
-      ["Name","14.05","21.05","28.05"],
-      ["Dario","","",""],
-      ["Marco","","",""],
-      ["Sven","","",""]
-    ];
+    } else {
+
+      data = [
+        ["Name","14.05","21.05","28.05"],
+        ["Dario","","",""],
+        ["Marco","","",""],
+        ["Sven","","",""]
+      ];
+
+    }
+
+    draw();
+
+  } catch (e) {
+
+    alert("Load Fehler: " + e);
 
   }
-
-  draw();
 
 }
 
@@ -119,13 +126,21 @@ function draw() {
 
 async function save() {
 
-  const ref = db.collection("training").doc("list");
+  try {
 
-  await ref.set({
-    data: data
-  });
+    const ref = db.collection("training").doc("list");
 
-  alert("gespeichert");
+    await ref.set({
+      data: data
+    });
+
+    alert("gespeichert OK");
+
+  } catch (e) {
+
+    alert("Save Fehler: " + e);
+
+  }
 
 }
 
