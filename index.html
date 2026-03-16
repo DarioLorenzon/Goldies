@@ -111,21 +111,78 @@ async function save(){
 
 let csv=dataGlobal.map(r=>r.join(",")).join("\n")
 
-let token="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"
+let token="DEIN_TOKEN"
 let repo="DarioLorenzon/Goldies"
 let path="teilnahmen.csv"
+let branch="main"
 
-let res1=await fetch(
-`https://api.github.com/repos/${repo}/contents/${path}`
+try{
+
+// Datei holen
+
+let res1 = await fetch(
+`https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`
 )
 
-let json1=await res1.json()
+let json1 = await res1.json()
 
-let sha=json1.sha
+if(!json1.sha){
+alert("Fehler beim Laden:\n"+JSON.stringify(json1))
+return
+}
 
-await fetch(
+let sha = json1.sha
+
+
+// UTF-8 richtig encodieren
+let content = btoa(unescape(encodeURIComponent(csv)))
+
+
+// speichern
+
+let res2 = await fetch(
 `https://api.github.com/repos/${repo}/contents/${path}`,
 {
+method:"PUT",
+
+headers:{
+Authorization:"token "+token,
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+message:"update teilnahmen",
+content:content,
+sha:sha,
+branch:branch
+
+})
+
+}
+)
+
+let json2 = await res2.json()
+
+if(json2.commit){
+
+alert("Gespeichert OK")
+
+}else{
+
+alert("Fehler beim Speichern:\n"+JSON.stringify(json2))
+
+}
+
+}catch(e){
+
+alert("JS Fehler:\n"+e)
+
+}
+
+}
+
+  
 method:"PUT",
 
 headers:{
