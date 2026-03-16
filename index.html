@@ -4,121 +4,137 @@
 
 <meta charset="UTF-8">
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
+  authDomain: "goldies-89ea2.firebaseapp.com",
+  projectId: "goldies-89ea2",
+  storageBucket: "goldies-89ea2.firebasestorage.app",
+  messagingSenderId: "210598012879",
+  appId: "1:210598012879:web:dca79e3e3eb237e5bb14ba",
+  measurementId: "G-2T3PTP7J0Z"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let data = [];
+
+
+async function load() {
+
+  const ref = doc(db, "training", "list");
+  const snap = await getDoc(ref);
+
+  if (snap.exists()) {
+
+    data = snap.data().data;
+
+  } else {
+
+    data = [
+      ["Name","14.05","21.05","28.05"],
+      ["Dario","","",""],
+      ["Marco","","",""],
+      ["Sven","","",""]
+    ];
+
+  }
+
+  draw();
+}
+
+
+function draw() {
+
+  let t = document.getElementById("t");
+  t.innerHTML = "";
+
+  data.forEach((row, r) => {
+
+    let tr = document.createElement("tr");
+
+    row.forEach((c, i) => {
+
+      let td = document.createElement(r ? "td" : "th");
+
+      if (r && i) {
+
+        let s = document.createElement("select");
+
+        ["", "ja", "ev", "nein"].forEach(v => {
+
+          let o = document.createElement("option");
+          o.text = v;
+          o.value = v;
+
+          if (c == v) o.selected = true;
+
+          s.appendChild(o);
+
+        });
+
+        s.onchange = () => data[r][i] = s.value;
+
+        td.appendChild(s);
+
+      } else {
+
+        td.textContent = c;
+
+      }
+
+      tr.appendChild(td);
+
+    });
+
+    t.appendChild(tr);
+
+  });
+
+}
+
+
+async function save() {
+
+  const ref = doc(db, "training", "list");
+
+  await setDoc(ref, {
+    data: data
+  });
+
+  alert("gespeichert");
+
+}
+
+
+window.save = save;
+
+load();
+
+</script>
 
 </head>
 
 <body>
 
-<h2>Training</h2>
+<h2>Handball Training</h2>
 
 <button onclick="save()">Speichern</button>
 
+<br><br>
+
 <table id="t"></table>
-
-<script>
-
-const firebaseConfig = {
-
-API_HIER
-
-};
-
-firebase.initializeApp(firebaseConfig)
-
-const db = firebase.firestore()
-
-let data = []
-
-async function load(){
-
-let doc = await db.collection("training").doc("list").get()
-
-if(doc.exists){
-
-data = doc.data().data
-
-}else{
-
-data = [
-["Name","1","2"],
-["Dario","",""],
-["Marco","",""]
-]
-
-}
-
-draw()
-
-}
-
-function draw(){
-
-let t=document.getElementById("t")
-
-t.innerHTML=""
-
-data.forEach((row,r)=>{
-
-let tr=document.createElement("tr")
-
-row.forEach((c,i)=>{
-
-let td=document.createElement(r?"td":"th")
-
-if(r&&i){
-
-let s=document.createElement("select")
-
-;["","ja","ev","nein"].forEach(v=>{
-
-let o=document.createElement("option")
-
-o.text=v
-o.value=v
-
-if(c==v) o.selected=true
-
-s.appendChild(o)
-
-})
-
-s.onchange=()=>data[r][i]=s.value
-
-td.appendChild(s)
-
-}else{
-
-td.textContent=c
-
-}
-
-tr.appendChild(td)
-
-})
-
-t.appendChild(tr)
-
-})
-
-}
-
-async function save(){
-
-await db.collection("training").doc("list").set({
-
-data:data
-
-})
-
-alert("gespeichert")
-
-}
-
-load()
-
-</script>
 
 </body>
 </html>
