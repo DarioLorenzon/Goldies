@@ -192,25 +192,41 @@ resolve(rows);
 
 function mergeData(csv, db){
 
-let result=[];
+let result = [];
 
-let rows=csv.length;
-let cols=csv[0].length;
+let rows = csv.length;
+let cols = csv[0].length;
 
-for(let r=0;r<rows;r++){
+for(let r=0; r<rows; r++){
 
-result[r]=[];
+    result[r] = [];
 
-for(let c=0;c<cols;c++){
+    for(let c=0; c<cols; c++){
 
-let csvVal=csv[r]?.[c] ?? "";
-let dbVal=db?.[r]?.[c] ?? "";
+        let csvVal = csv[r]?.[c] ?? "";
+        let dbVal  = db?.[r]?.[c] ?? "";
 
-if(r===0) result[r][c]=csvVal;
-else if(c===0) result[r][c]=csvVal;
-else result[r][c]=dbVal;
+        // Datum
+        if(r === 0){
+            result[r][c] = csvVal;
+        }
 
-}
+        // Typ-Zeile
+        else if(r === 1){
+            result[r][c] = csvVal;
+        }
+
+        // Namen
+        else if(c === 0){
+            result[r][c] = csvVal;
+        }
+
+        // Werte
+        else{
+            result[r][c] = dbVal;
+        }
+
+    }
 
 }
 
