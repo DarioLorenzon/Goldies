@@ -44,19 +44,33 @@ function loadCSV(){
 
 return new Promise((resolve)=>{
 
-Papa.parse("teilnahmen.csv",{
+Papa.parse("./teilnahmen.csv",{
 
 download:true,
 
+skipEmptyLines:false,
+
 complete:(res)=>{
 
+console.log("CSV",res.data)
+
 resolve(res.data)
+
+},
+
+error:(err)=>{
+
+alert("CSV Fehler "+err)
+
+resolve(defaultData())
 
 }
 
 })
 
 })
+
+}
 
 }
   
