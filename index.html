@@ -47,36 +47,36 @@ min-width:70px;
 background:white;
 }
 
-/* header */
+/* HEADER FIX */
 
 th{
 position:sticky;
 top:0;
 background:#ddd;
-z-index:3;
+z-index:10;
 }
 
-/* first column */
+/* FIRST COLUMN FIX */
 
 .name{
 position:sticky;
 left:0;
 background:#f0f0f0;
-z-index:2;
+z-index:5;
 text-align:left;
 }
 
-/* corner */
+/* TOP LEFT CORNER FIX */
 
 .header-name{
 position:sticky;
 top:0;
 left:0;
 background:#ccc;
-z-index:4;
+z-index:20;
 }
 
-/* colors */
+/* COLORS */
 
 .ja{background:#8f8;}
 .ev{background:#ff8;}
@@ -211,6 +211,8 @@ let td=document.createElement(r==0?"th":"td")
 
 let val=data[r][c]||""
 
+// header
+
 if(r===0){
 
 td.textContent=val
@@ -223,12 +225,16 @@ td.classList.add("weekend")
 
 }
 
+// name
+
 else if(c===0){
 
 td.textContent=val
 td.className="name"
 
 }
+
+// dropdown
 
 else{
 
