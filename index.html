@@ -10,40 +10,72 @@
 
 <style>
 
-table {
-  border-collapse: collapse;
+body{
+font-family: Arial;
 }
 
-td, th {
-  border: 1px solid #999;
-  padding: 4px;
-  text-align: center;
+table{
+border-collapse: collapse;
 }
 
-.ja {
-  background: #8f8;
+td, th{
+border:1px solid #999;
+padding:4px;
+text-align:center;
+min-width:60px;
 }
 
-.ev {
-  background: #ff8;
+th{
+background:#ddd;
+position:sticky;
+top:0;
+z-index:3;
 }
 
-.nein {
-  background: #f88;
+.name{
+position:sticky;
+left:0;
+background:#eee;
+z-index:2;
+text-align:left;
 }
 
-.count {
-  font-weight: bold;
-  background: #eee;
+.header-name{
+position:sticky;
+left:0;
+top:0;
+background:#ccc;
+z-index:4;
+}
+
+.ja{
+background:#8f8;
+}
+
+.ev{
+background:#ff8;
+}
+
+.nein{
+background:#f88;
+}
+
+.count{
+background:#ddd;
+font-weight:bold;
+}
+
+.weekend{
+font-weight:bold;
+background:#f0f0f0;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<h2>Training</h2>
+<h2>Goldies Termine</h2>
 
 <button onclick="save()">Speichern</button>
 
@@ -129,7 +161,7 @@ let t=document.getElementById("t")
 
 t.innerHTML=""
 
-let counts = new Array(data[0].length).fill(0)
+let counts=new Array(data[0].length).fill(0)
 
 for(let r=0;r<data.length;r++){
 
@@ -139,20 +171,30 @@ for(let c=0;c<data[0].length;c++){
 
 let td=document.createElement(r==0?"th":"td")
 
-// Kopf
+let val=data[r][c]||""
+
+// HEADER
 if(r==0){
 
-td.textContent=data[r][c]
+td.textContent=val
 
-// Namen
+if(c==0){
+td.className="header-name"
+}
+
+// Wochenende fett (Sa / So)
+if(val.includes("Sa") || val.includes("So")){
+td.classList.add("weekend")
+}
+
+// NAME
 }else if(c==0){
 
-td.textContent=data[r][c]
+td.textContent=val
+td.className="name"
 
-// Dropdown
+// DROPDOWN
 }else{
-
-let val=data[r][c]||""
 
 let s=document.createElement("select")
 
@@ -176,6 +218,58 @@ draw()
 }
 
 td.appendChild(s)
+
+if(val=="ja"){
+td.classList.add("ja")
+counts[c]++
+}
+
+if(val=="ev"){
+td.classList.add("ev")
+}
+
+if(val=="nein"){
+td.classList.add("nein")
+}
+
+}
+
+tr.appendChild(td)
+
+}
+
+t.appendChild(tr)
+
+}
+
+
+// TOTAL ZEILE
+
+let tr=document.createElement("tr")
+
+for(let c=0;c<data[0].length;c++){
+
+let td=document.createElement("td")
+
+if(c==0){
+
+td.textContent="Total"
+td.className="name"
+
+}else{
+
+td.textContent=counts[c]
+td.className="count"
+
+}
+
+tr.appendChild(td)
+
+}
+
+t.appendChild(tr)
+
+}
 
 // Farbe
 
