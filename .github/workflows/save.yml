@@ -1,0 +1,25 @@
+name: save csv
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  save:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v3
+
+    - name: write csv
+      run: |
+        echo "${{ github.event.issue.body }}" > teilnahmen.csv
+
+    - name: commit
+      run: |
+        git config user.name bot
+        git config user.email bot@bot.com
+        git add teilnahmen.csv
+        git commit -m save
+        git push
