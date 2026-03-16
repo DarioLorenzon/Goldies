@@ -30,148 +30,132 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
-let data = []
+let data = [];
 
 
 // Default Tabelle
 
-function defaultData(){
+function defaultData() {
 
-return [
-["Name","14.05","21.05","28.05"],
-["Dario","","",""],
-["Marco","","",""],
-["Sven","","",""]
-]
-
-}
-
-
-// Zeichnen
-
-function draw(){
-
-let t=document.getElementById("t")
-
-t.innerHTML=""
-
-data.forEach((row,r)=>{
-
-let tr=document.createElement("tr")
-
-row.forEach((c,i)=>{
-
-let td=document.createElement(r?"td":"th")
-
-if(r && i){
-
-let s=document.createElement("select")
-
-;["","ja","ev","nein"].forEach(v=>{
-
-let o=document.createElement("option")
-
-o.value=v
-o.text=v
-
-if(c==v) o.selected=true
-
-s.appendChild(o)
-
-})
-
-s.onchange=()=>data[r][i]=s.value
-
-td.appendChild(s)
-
-}else{
-
-td.textContent=c
+  return [
+    ["Name","14.05","21.05","28.05"],
+    ["Dario","","",""],
+    ["Marco","","",""],
+    ["Sven","","",""]
+  ];
 
 }
 
-tr.appendChild(td)
 
-})
+// Tabelle zeichnen
 
-t.appendChild(tr)
+function draw() {
 
-})
+  let t = document.getElementById("t");
+
+  t.innerHTML = "";
+
+  data.forEach((row, r) => {
+
+    let tr = document.createElement("tr");
+
+    row.forEach((c, i) => {
+
+      let td = document.createElement(r ? "td" : "th");
+
+      if (r && i) {
+
+        let s = document.createElement("select");
+
+        ["","ja","ev","nein"].forEach(v => {
+
+          let o = document.createElement("option");
+
+          o.value = v;
+          o.text = v;
+
+          if (c == v) o.selected = true;
+
+          s.appendChild(o);
+
+        });
+
+        s.onchange = () => data[r][i] = s.value;
+
+        td.appendChild(s);
+
+      } else {
+
+        td.textContent = c;
+
+      }
+
+      tr.appendChild(td);
+
+    });
+
+    t.appendChild(tr);
+
+  });
 
 }
 
 
 // Laden
 
-async function load(){
+async function load() {
 
-try{
+  try {
 
-let doc = await db.collection("training").doc("list").get()
+    let doc = await db.collection("training").doc("list").get();
 
-if(doc.exists && doc.data().json){
+    if (doc.exists && doc.data().json) {
 
-data = JSON.parse(doc.data().json)
+      data = JSON.parse(doc.data().json);
 
-}else{
+    } else {
 
-data = defaultData()
+      data = defaultData();
 
-}
+    }
 
-draw()
+  } catch (e) {
 
-}catch(e){
+    alert("Load Fehler: " + e);
 
-alert("Load Fehler: "+e)
+    data = defaultData();
 
-data = defaultData()
+  }
 
-draw()
-
-}
-
-}
-
-draw()
-
-}catch(e){
-
-alert("Load Fehler: "+e)
-
-data = defaultData()
-
-draw()
-
-}
+  draw();
 
 }
 
 
 // Speichern
 
-async function save(){
+async function save() {
 
-try{
+  try {
 
-await db.collection("training").doc("list").set({
+    await db.collection("training").doc("list").set({
 
-json: JSON.stringify(data)
+      json: JSON.stringify(data)
 
-})
+    });
 
-alert("gespeichert")
+    alert("gespeichert");
 
-}catch(e){
+  } catch (e) {
 
-alert(e)
+    alert("Save Fehler: " + e);
+
+  }
 
 }
 
-}
 
-
-load()
+load();
 
 </script>
 
