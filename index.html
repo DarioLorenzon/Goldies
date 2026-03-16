@@ -19,20 +19,20 @@ h2{
 margin:8px;
 }
 
-/* Scroll Container */
+/* nur horizontal scroll */
 
 .table-wrap{
-overflow:auto;
-height:80vh;
+overflow-x:auto;
+overflow-y:visible;
 width:100%;
 -webkit-overflow-scrolling:touch;
 }
 
-/* Table */
+/* table */
 
 table{
 border-collapse:collapse;
-min-width:1000px;
+min-width:1200px;
 }
 
 td,th{
@@ -43,7 +43,7 @@ min-width:70px;
 background:white;
 }
 
-/* Header */
+/* header */
 
 th{
 position:sticky;
@@ -52,7 +52,7 @@ background:#ddd;
 z-index:3;
 }
 
-/* First column */
+/* first column */
 
 .name{
 position:sticky;
@@ -62,17 +62,17 @@ z-index:2;
 text-align:left;
 }
 
-/* Top left */
+/* top left */
 
 .header-name{
 position:sticky;
-top:0;
 left:0;
+top:0;
 background:#ccc;
 z-index:4;
 }
 
-/* Colors */
+/* colors */
 
 .ja{background:#8f8;}
 .ev{background:#ff8;}
