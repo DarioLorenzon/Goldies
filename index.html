@@ -9,10 +9,6 @@
 
 <style>
 
-body{
-font-family:Arial;
-}
-
 table{
 border-collapse:collapse;
 }
@@ -27,10 +23,6 @@ select{
 width:70px;
 }
 
-.ja { background:#8f8 }
-.ev { background:#ff8 }
-.nein { background:#f88 }
-
 </style>
 
 </head>
@@ -39,15 +31,13 @@ width:70px;
 
 <h2>Handball Trainingsübersicht</h2>
 
+<button onclick="save()">Speichern</button>
+
 <table id="tabelle"></table>
 
 <script>
 
-function setColor(select){
-
-select.className = select.value
-
-}
+let dataGlobal
 
 Papa.parse("teilnahmen.csv", {
 
@@ -55,10 +45,21 @@ download:true,
 
 complete:function(res){
 
-let data=res.data
+dataGlobal=res.data
+
+draw()
+
+}
+
+})
+
+function draw(){
+
 let table=document.getElementById("tabelle")
 
-data.forEach((row,r)=>{
+table.innerHTML=""
+
+dataGlobal.forEach((row,r)=>{
 
 let tr=document.createElement("tr")
 
@@ -82,9 +83,11 @@ sel.appendChild(o)
 
 })
 
-sel.onchange=()=>setColor(sel)
+sel.onchange=()=>{
 
-setColor(sel)
+dataGlobal[r][c]=sel.value
+
+}
 
 td.appendChild(sel)
 
@@ -104,7 +107,47 @@ table.appendChild(tr)
 
 }
 
+async function save(){
+
+let csv=dataGlobal.map(r=>r.join(",")).join("\n")
+
+let token="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"
+let repo="DarioLorenzon/Goldies"
+let path="teilnahmen.csv"
+
+let res1=await fetch(
+`https://api.github.com/repos/${repo}/contents/${path}`
+)
+
+let json1=await res1.json()
+
+let sha=json1.sha
+
+await fetch(
+`https://api.github.com/repos/${repo}/contents/${path}`,
+{
+method:"PUT",
+
+headers:{
+Authorization:"token "+token,
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+message:"update",
+
+content:btoa(csv),
+
+sha:sha
+
 })
+
+})
+
+alert("Gespeichert")
+
+}
 
 </script>
 
