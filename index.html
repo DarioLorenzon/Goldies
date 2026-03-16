@@ -15,12 +15,6 @@
 body{margin:0;font-family:Arial;font-size:14px;}
 h2{margin:6px;}
 
-#stats{
-padding:6px;
-font-size:14px;
-background:#eee;
-}
-
 .scroll-x{
 overflow-x:auto;
 overflow-y:auto;
@@ -87,8 +81,6 @@ td,th{min-width:45px;padding:2px;}
 <body>
 
 <h2>Training</h2>
-
-<div id="stats"></div>
 
 <div class="scroll-x">
 <table id="t"></table>
@@ -196,7 +188,7 @@ return result;
 
 
 
-// ---------- DATE HELPERS ----------
+// ---------- DATE ----------
 
 function isWeekend(text){
 
@@ -229,44 +221,6 @@ let today=new Date();
 today.setHours(0,0,0,0);
 
 return date>=today;
-
-}
-
-
-
-// ---------- STATS ----------
-
-function drawStats(visibleCols){
-
-let s=document.getElementById("stats")
-
-let html=""
-
-for(let i=1;i<visibleCols.length;i++){
-
-let c=visibleCols[i]
-
-let date=data[0][c] || ""
-
-let ja=0
-let ev=0
-let nein=0
-
-for(let r=1;r<data.length;r++){
-
-let v=data[r][c]
-
-if(v==="ja") ja++
-if(v==="ev") ev++
-if(v==="nein") nein++
-
-}
-
-html+=date+" ("+ja+"/"+ev+"/"+nein+") &nbsp;&nbsp;"
-
-}
-
-s.innerHTML=html
 
 }
 
@@ -432,9 +386,6 @@ trBottom.appendChild(th);
 }
 
 t.appendChild(trBottom);
-
-
-drawStats(visibleCols);
 
 }
 
