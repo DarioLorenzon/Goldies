@@ -10,21 +10,32 @@
 
 <style>
 
-body{
-font-family:Arial;
+html, body{
+height:100%;
 margin:0;
+font-family:Arial;
+overflow:hidden;
 }
+
+h2{
+margin:8px;
+}
+
+/* scroll container */
 
 .table-wrap{
 overflow:auto;
 width:100%;
-height:85vh;
+max-height:calc(100vh - 120px);
+-webkit-overflow-scrolling:touch;
 border:1px solid #999;
 }
 
+/* table */
+
 table{
 border-collapse:collapse;
-min-width:600px;
+min-width:900px;
 }
 
 td,th{
@@ -35,7 +46,7 @@ min-width:70px;
 background:white;
 }
 
-/* Kopf fix */
+/* header */
 
 th{
 position:sticky;
@@ -44,7 +55,7 @@ background:#ddd;
 z-index:3;
 }
 
-/* erste Spalte */
+/* first column */
 
 .name{
 position:sticky;
@@ -54,17 +65,17 @@ z-index:2;
 text-align:left;
 }
 
-/* Ecke oben links */
+/* corner */
 
 .header-name{
 position:sticky;
 top:0;
 left:0;
 background:#ccc;
-z-index:4;
+z-index:5;
 }
 
-/* Farben */
+/* colors */
 
 .ja{background:#8f8;}
 .ev{background:#ff8;}
@@ -78,6 +89,11 @@ font-weight:bold;
 .weekend{
 font-weight:bold;
 background:#f0f0f0;
+}
+
+select{
+font-size:16px;
+padding:4px;
 }
 
 </style>
@@ -96,6 +112,7 @@ background:#f0f0f0;
 
 <script>
 
+
 // ---------- Firebase ----------
 
 const firebaseConfig = {
@@ -105,10 +122,9 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const db = firebase.firestore();
 
-let data=[];
+let data = [];
 
 
 // ---------- CSV ----------
@@ -148,7 +164,7 @@ resolve(rows)
 }
 
 
-// ---------- Wochenende ----------
+// ---------- weekend ----------
 
 function isWeekend(text){
 
@@ -176,6 +192,7 @@ return day===0 || day===6
 function draw(){
 
 let t=document.getElementById("t")
+
 t.innerHTML=""
 
 if(!data.length) return
@@ -194,8 +211,6 @@ let td=document.createElement(r==0?"th":"td")
 
 let val=data[r][c]||""
 
-// Kopf
-
 if(r===0){
 
 td.textContent=val
@@ -208,16 +223,12 @@ td.classList.add("weekend")
 
 }
 
-// Name
-
 else if(c===0){
 
 td.textContent=val
 td.className="name"
 
 }
-
-// Dropdown
 
 else{
 
@@ -264,7 +275,7 @@ t.appendChild(tr)
 }
 
 
-// Total
+// total row
 
 let tr=document.createElement("tr")
 
