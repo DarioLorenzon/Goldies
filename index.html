@@ -111,7 +111,7 @@ td,th{min-width:45px;padding:2px;}
 
 <body>
 
-<h2>Training</h2>
+<h2>Goldies Termine</h2>
 
 <div class="scroll-x">
 <table id="t"></table>
@@ -337,16 +337,20 @@ let trType=document.createElement("tr");
 
 for(let i=0;i<visibleCols.length;i++){
 
-let c=visibleCols[i];
+let c = visibleCols[i];
 
-let td=document.createElement("td");
+let td = document.createElement("td");
 
-let val=data[1][c]||"";
+let val = (data[1] && data[1][c]) ? data[1][c] : "";
 
-td.textContent=val;
+td.textContent = val;
 
-td.style.fontSize="12px";
-td.style.color="#555";
+td.style.fontSize = "12px";
+td.style.color = "#555";
+
+if(c===0){
+    td.className="name";
+}
 
 trType.appendChild(td);
 
