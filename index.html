@@ -266,16 +266,14 @@ function draw(){
 let t = document.getElementById("t");
 t.innerHTML = "";
 
-if(!data.length) return;
+if(!data || data.length === 0) return;
 
 
-// -----------------------------
-// sichtbare Spalten bestimmen
-// -----------------------------
+// sichtbare Spalten
 
 let visibleCols = [];
 
-for(let c=0;c<data[0].length;c++){
+for(let c=0; c<data[0].length; c++){
 
     if(c===0){
         visibleCols.push(c);
@@ -291,34 +289,29 @@ for(let c=0;c<data[0].length;c++){
 }
 
 
-// -----------------------------
-// counts berechnen (nur Spieler)
-// -----------------------------
+// counts
 
 let counts = new Array(data[0].length).fill(0);
 
-for(let r=2;r<data.length;r++){
+for(let r=2; r<data.length; r++){
 
-    for(let c=1;c<data[0].length;c++){
+    for(let c=1; c<data[0].length; c++){
 
-        let v = data[r][c];
-
-        if(v==="ja") counts[c]++;
+        if(data[r][c] === "ja"){
+            counts[c]++;
+        }
 
     }
 
 }
 
 
-// -----------------------------
-// HEADER DATUM
-// -----------------------------
+
+// ===== DATUM =====
 
 let trHead = document.createElement("tr");
 
-for(let i=0;i<visibleCols.length;i++){
-
-    let c = visibleCols[i];
+visibleCols.forEach(c => {
 
     let th = document.createElement("th");
 
@@ -332,20 +325,17 @@ for(let i=0;i<visibleCols.length;i++){
 
     trHead.appendChild(th);
 
-}
+});
 
 t.appendChild(trHead);
 
 
-// -----------------------------
-// HEADER TYP
-// -----------------------------
+
+// ===== TYP =====
 
 let trType = document.createElement("tr");
 
-for(let i=0;i<visibleCols.length;i++){
-
-    let c = visibleCols[i];
+visibleCols.forEach(c => {
 
     let td = document.createElement("td");
 
@@ -362,53 +352,43 @@ for(let i=0;i<visibleCols.length;i++){
 
     trType.appendChild(td);
 
-}
+});
 
 t.appendChild(trType);
 
 
-// -----------------------------
-// TOTAL
-// -----------------------------
+
+// ===== TOTAL =====
 
 let trTotal = document.createElement("tr");
 
-for(let i=0;i<visibleCols.length;i++){
-
-    let c = visibleCols[i];
+visibleCols.forEach(c => {
 
     let td = document.createElement("td");
 
     if(c===0){
-
         td.textContent = "Total";
         td.className = "name total";
-
     }else{
-
         td.textContent = counts[c];
         td.className = "count";
-
     }
 
     trTotal.appendChild(td);
 
-}
+});
 
 t.appendChild(trTotal);
 
 
-// -----------------------------
-// SPIELER
-// -----------------------------
 
-for(let r=2;r<data.length;r++){
+// ===== SPIELER =====
+
+for(let r=2; r<data.length; r++){
 
     let tr = document.createElement("tr");
 
-    for(let i=0;i<visibleCols.length;i++){
-
-        let c = visibleCols[i];
+    visibleCols.forEach(c => {
 
         let td = document.createElement("td");
 
@@ -423,19 +403,20 @@ for(let r=2;r<data.length;r++){
 
             let s = document.createElement("select");
 
-            ["","ja","ev","nein"].forEach(v=>{
+            ["","ja","ev","nein"].forEach(v => {
 
                 let o = document.createElement("option");
+
                 o.value = v;
                 o.text = v;
 
-                if(val===v) o.selected = true;
+                if(val === v) o.selected = true;
 
                 s.appendChild(o);
 
             });
 
-            s.onchange = ()=>{
+            s.onchange = () => {
 
                 data[r][c] = s.value;
                 draw();
@@ -453,22 +434,19 @@ for(let r=2;r<data.length;r++){
 
         tr.appendChild(td);
 
-    }
+    });
 
     t.appendChild(tr);
 
 }
 
 
-// -----------------------------
-// HEADER UNTEN
-// -----------------------------
+
+// ===== DATUM UNTEN =====
 
 let trBottom = document.createElement("tr");
 
-for(let i=0;i<visibleCols.length;i++){
-
-    let c = visibleCols[i];
+visibleCols.forEach(c => {
 
     let th = document.createElement("th");
 
@@ -482,196 +460,7 @@ for(let i=0;i<visibleCols.length;i++){
 
     trBottom.appendChild(th);
 
-}
-
-t.appendChild(trBottom);
-
-}
-
-let val=data[0][c];
-
-if(isFutureOrToday(val)){
-visibleCols.push(c);
-}
-
-}
-
-
-// counts
-
-let counts=new Array(data[0].length).fill(0);
-
-for(let r=2;r<data.length;r++){
-
-for(let c=1;c<data[0].length;c++){
-
-let v=data[r][c];
-
-if(v==="ja") counts[c]++;
-
-}
-
-}
-
-
-
-// ---------- HEADER DATUM ----------
-
-let trHead=document.createElement("tr");
-
-for(let i=0;i<visibleCols.length;i++){
-
-let c=visibleCols[i];
-
-let th=document.createElement("th");
-
-let val=data[0][c]||"";
-
-th.textContent=val;
-
-if(isWeekend(val)) th.classList.add("weekend");
-
-trHead.appendChild(th);
-
-}
-
-t.appendChild(trHead);
-
-
-
-// ---------- HEADER TYP ----------
-
-let trType=document.createElement("tr");
-
-for(let i=0;i<visibleCols.length;i++){
-
-let c = visibleCols[i];
-
-let td = document.createElement("td");
-
-let val = (data[1] && data[1][c]) ? data[1][c] : "";
-
-td.textContent = val;
-
-td.style.fontSize = "12px";
-td.style.color = "#555";
-
-if(c===0){
-    td.className="name";
-}
-
-trType.appendChild(td);
-
-}
-
-t.appendChild(trType);
-
-
-
-// ---------- TOTAL ----------
-
-let trTotal=document.createElement("tr");
-
-for(let i=0;i<visibleCols.length;i++){
-
-let c=visibleCols[i];
-
-let td=document.createElement("td");
-
-if(c===0){
-td.textContent="Total";
-td.className="name total";
-}else{
-td.textContent=counts[c];
-td.className="count";
-}
-
-trTotal.appendChild(td);
-
-}
-
-t.appendChild(trTotal);
-
-
-
-// ---------- ROWS ----------
-
-for(let r=2;r<data.length;r++){
-
-let tr=document.createElement("tr");
-
-for(let i=0;i<visibleCols.length;i++){
-
-let c=visibleCols[i];
-
-let td=document.createElement("td");
-
-let val=data[r][c]||"";
-
-if(c===0){
-
-td.textContent=val;
-td.className="name";
-
-}else{
-
-let s=document.createElement("select");
-
-["","ja","ev","nein"].forEach(v=>{
-
-let o=document.createElement("option");
-o.value=v;
-o.text=v;
-
-if(val===v) o.selected=true;
-
-s.appendChild(o);
-
 });
-
-s.onchange=()=>{
-data[r][c]=s.value;
-draw();
-autoSave();
-};
-
-td.appendChild(s);
-
-if(val==="ja") td.classList.add("ja");
-if(val==="ev") td.classList.add("ev");
-if(val==="nein") td.classList.add("nein");
-
-}
-
-tr.appendChild(td);
-
-}
-
-t.appendChild(tr);
-
-}
-
-
-
-// ---------- HEADER UNTEN ----------
-
-let trBottom=document.createElement("tr");
-
-for(let i=0;i<visibleCols.length;i++){
-
-let c=visibleCols[i];
-
-let th=document.createElement("th");
-
-let val=data[0][c]||"";
-
-th.textContent=val;
-
-if(isWeekend(val)) th.classList.add("weekend");
-
-trBottom.appendChild(th);
-
-}
 
 t.appendChild(trBottom);
 
