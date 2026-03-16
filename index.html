@@ -1,1 +1,400 @@
-bitte komplette html repariert
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<style>
+
+body{margin:0;font-family:Arial;font-size:14px;}
+h2{margin:6px;}
+
+.scroll-x{
+overflow-x:auto;
+overflow-y:auto;
+width:100%;
+-webkit-overflow-scrolling:touch;
+}
+
+table{
+border-collapse:collapse;
+width:max-content;
+min-width:700px;
+}
+
+td,th{
+border:1px solid #999;
+padding:4px;
+text-align:center;
+min-width:60px;
+background:white;
+}
+
+.name{
+position:sticky;
+left:0;
+background:#f0f0f0;
+z-index:5;
+text-align:left;
+font-weight:bold;
+min-width:90px;
+}
+
+th:first-child{
+position:sticky;
+left:0;
+background:#ccc;
+z-index:6;
+}
+
+.ja{background:#8f8;}
+.ev{background:#ff8;}
+.nein{background:#f88;}
+
+.count{background:#ddd;font-weight:bold;}
+
+.weekend{
+background:#e6ccff;
+font-weight:bold;
+}
+
+select{font-size:14px;padding:2px;}
+
+@media (max-width:700px){
+td,th{min-width:45px;padding:2px;}
+.name{min-width:70px;}
+table{min-width:500px;}
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Training</h2>
+
+<div class="scroll-x">
+<table id="t"></table>
+</div>
+
+<script>
+
+const firebaseConfig = {
+apiKey:"AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
+authDomain:"goldies-89ea2.firebaseapp.com",
+projectId:"goldies-89ea2"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let data=[];
+let initialized=false;
+
+
+// ---------- AUTOSAVE ----------
+
+let saveTimer=null;
+
+function autoSave(){
+
+if(!initialized) return;
+
+if(saveTimer) clearTimeout(saveTimer);
+
+saveTimer=setTimeout(()=>{
+save();
+},800);
+
+}
+
+
+// ---------- CSV ----------
+
+function loadCSV(){
+
+return new Promise(resolve=>{
+
+Papa.parse("./teilnahmen.csv",{
+
+download:true,
+skipEmptyLines:true,
+
+complete:(res)=>{
+
+let rows=res.data;
+
+let max=0;
+
+rows.forEach(r=>{
+if(r.length>max) max=r.length;
+});
+
+rows=rows.map(r=>{
+while(r.length<max) r.push("");
+return r;
+});
+
+resolve(rows);
+
+}
+
+});
+
+});
+
+}
+
+
+// ---------- MERGE ----------
+
+function mergeData(csv, db){
+
+let result=[];
+
+let rows = csv.length;
+let cols = csv[0].length;
+
+for(let r=0;r<rows;r++){
+
+result[r]=[];
+
+for(let c=0;c<cols;c++){
+
+let csvVal = csv[r]?.[c] ?? "";
+let dbVal  = db?.[r]?.[c] ?? "";
+
+if(r===0){
+result[r][c]=csvVal;
+}
+else if(c===0){
+result[r][c]=csvVal;
+}
+else{
+result[r][c]=dbVal || "";
+}
+
+}
+
+}
+
+return result;
+
+}
+
+
+// ---------- weekend ----------
+
+function isWeekend(text){
+
+if(!text) return false;
+
+let p=text.split(".");
+if(p.length<2) return false;
+
+let d=parseInt(p[0]);
+let m=parseInt(p[1])-1;
+let y=2026;
+
+let dt=new Date(y,m,d);
+
+let day=dt.getDay();
+
+return day===0 || day===6;
+
+}
+
+
+// ---------- draw ----------
+
+function draw(){
+
+let t=document.getElementById("t");
+t.innerHTML="";
+
+if(!data.length) return;
+
+let cols=data[0].length;
+let counts=new Array(cols).fill(0);
+
+
+// HEADER
+
+let trHead=document.createElement("tr");
+
+for(let c=0;c<cols;c++){
+
+let th=document.createElement("th");
+
+let val=data[0][c]||"";
+
+th.textContent=val;
+
+if(isWeekend(val)){
+th.classList.add("weekend");
+}
+
+trHead.appendChild(th);
+
+}
+
+t.appendChild(trHead);
+
+
+// DATA
+
+for(let r=1;r<data.length;r++){
+
+let tr=document.createElement("tr");
+
+for(let c=0;c<cols;c++){
+
+let td=document.createElement("td");
+
+let val=data[r][c]||"";
+
+if(c===0){
+
+td.textContent=val;
+td.className="name";
+
+}else{
+
+let s=document.createElement("select");
+
+["","ja","ev","nein"].forEach(v=>{
+
+let o=document.createElement("option");
+o.value=v;
+o.text=v;
+
+if(val===v) o.selected=true;
+
+s.appendChild(o);
+
+});
+
+s.onchange=()=>{
+data[r][c]=s.value;
+draw();
+autoSave();
+};
+
+td.appendChild(s);
+
+if(val==="ja"){td.classList.add("ja");counts[c]++;}
+if(val==="ev") td.classList.add("ev");
+if(val==="nein") td.classList.add("nein");
+
+}
+
+tr.appendChild(td);
+
+}
+
+t.appendChild(tr);
+
+}
+
+
+// TOTAL
+
+let trTotal=document.createElement("tr");
+
+for(let c=0;c<cols;c++){
+
+let td=document.createElement("td");
+
+if(c===0){
+td.textContent="Total";
+td.className="name";
+}else{
+td.textContent=counts[c];
+td.className="count";
+}
+
+trTotal.appendChild(td);
+
+}
+
+t.appendChild(trTotal);
+
+
+// HEADER AGAIN (unten)
+
+let trBottom=document.createElement("tr");
+
+for(let c=0;c<cols;c++){
+
+let th=document.createElement("th");
+
+let val=data[0][c]||"";
+
+th.textContent=val;
+
+if(isWeekend(val)){
+th.classList.add("weekend");
+}
+
+trBottom.appendChild(th);
+
+}
+
+t.appendChild(trBottom);
+
+}
+
+
+// ---------- load ----------
+
+async function load(){
+
+let csv = await loadCSV();
+
+let dbData=null;
+
+try{
+
+let doc=await db.collection("training").doc("list").get();
+
+if(doc.exists && doc.data().json){
+dbData=JSON.parse(doc.data().json);
+}
+
+}catch(e){}
+
+data = mergeData(csv, dbData);
+
+await save();
+
+initialized=true;
+
+draw();
+
+}
+
+
+// ---------- save ----------
+
+async function save(){
+
+await db.collection("training").doc("list").set({
+json:JSON.stringify(data)
+});
+
+}
+
+
+load();
+
+</script>
+
+</body>
+</html>
