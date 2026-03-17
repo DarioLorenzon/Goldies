@@ -3,552 +3,486 @@
 
 <head>
 
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-  <!-- =========================
-       PapaParse
-  ========================= -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
 
+body {
+  margin: 0;
+  font-family: Arial;
+  font-size: 14px;
+}
 
-  <!-- =========================
-       Firebase
-  ========================= -->
+.scroll-x {
+  overflow: auto;
+  width: 100%;
+}
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+table {
+  border-collapse: collapse;
+  width: max-content;
+}
 
+td, th {
+  border: 1px solid #999;
+  padding: 4px;
+  min-width: 40px;
+  text-align: center;
+  background: white;
+}
 
+.name {
+  position: sticky;
+  left: 0;
+  background: white;
+  min-width: 45px;
+  text-align: left;
+  padding-left: 4px;
+}
 
-  <!-- =========================
-       STYLE
-  ========================= -->
+th:first-child {
+  position: sticky;
+  left: 0;
+  background: white;
+}
 
-  <style>
+.ja { background: #8f8; }
+.ev { background: #ff8; }
+.nein { background: #f7caca; }
 
-    body {
-      margin: 0;
-      font-family: Arial;
-      font-size: 14px;
-    }
+.count {
+  background: #f5f5f5;
+  font-size: 12px;
+}
 
+.weekend {
+  background: #e6ccff;
+}
 
-    .scroll-x {
-      overflow: auto;
-      width: 100%;
-    }
+.today {
+  background: #dbeeff;
+}
 
-
-    table {
-      border-collapse: collapse;
-      width: max-content;
-    }
-
-
-    td,
-    th {
-      border: 1px solid #999;
-      padding: 4px;
-      min-width: 55px;
-      text-align: center;
-      background: white;
-    }
-
-
-    .name {
-      position: sticky;
-      left: 0;
-      background: white;
-      min-width: 45px;
-      text-align: left;
-      padding-left: 4px;
-      font-weight: normal;
-    }
-
-
-    th:first-child {
-      position: sticky;
-      left: 0;
-      background: white;
-    }
-
-
-    select {
-      font-size: 12px;
-      padding: 1px 2px;
-      height: 20px;
-    }
-
-
-    .ja {
-      background: #8f8;
-    }
-
-    .ev {
-      background: #ff8;
-    }
-
-    .nein {
-      background: #f7caca;
-    }
-
-
-    .count {
-      background: #f5f5f5;
-      font-size: 12px;
-      color: #444;
-    }
-
-
-    .total {
-      font-size: 12px;
-      color: #555;
-    }
-
-
-    .weekend {
-      background: #e6ccff;
-    }
-
-  </style>
+</style>
 
 </head>
 
-
-
 <body>
 
-  <div class="scroll-x">
-    <table id="t"></table>
-  </div>
-
-
-
-  <script>
-
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
-      authDomain: "goldies-89ea2.firebaseapp.com",
-      projectId: "goldies-89ea2"
-    };
-
-
-    firebase.initializeApp(firebaseConfig);
-
-    const db = firebase.firestore();
-
-
-    let data = [];
-    let initialized = false;
-
-
-    let saveTimer = null;
-
-
-    function autoSave() {
-
-      if (!initialized) return;
-
-      clearTimeout(saveTimer);
-
-      saveTimer = setTimeout(save, 800);
-
-    }
-
-
-
-    function loadCSV() {
-
-      return new Promise(resolve => {
-
-        Papa.parse("./teilnahmen.csv", {
-
-          download: true,
-
-          complete: (res) => {
-
-            let rows = res.data;
-
-
-            rows = rows.filter(r =>
-              r && r.some(v => v && v.trim() !== "")
-            );
-
-
-            let max = 0;
-
-            rows.forEach(r => {
-              if (r.length > max) max = r.length;
-            });
-
-
-            rows = rows.map(r => {
-
-              while (r.length < max) r.push("");
-
-              return r;
-
-            });
-
-
-            resolve(rows);
-
-          }
-
-        });
-
-      });
-
-    }
-
-
-
-    function mergeData(csv, dbData) {
-
-      let result = [];
-
-      let rows = csv.length;
-      let cols = csv[0].length;
-
-
-      for (let r = 0; r < rows; r++) {
-
-        result[r] = [];
-
-        for (let c = 0; c < cols; c++) {
-
-          let csvVal = csv[r]?.[c] ?? "";
-          let dbVal = dbData?.[r]?.[c] ?? "";
-
-
-          if (r === 0) result[r][c] = csvVal;
-          else if (r === 1) result[r][c] = csvVal;
-          else if (c === 0) result[r][c] = csvVal;
-          else result[r][c] = dbVal || "";
-
-        }
-
-      }
-
-      return result;
-
-    }
-
-
-
-    function isWeekend(text) {
-
-      let p = text.split(".");
-
-      if (p.length < 2) return false;
-
-      let d = parseInt(p[0]);
-      let m = parseInt(p[1]) - 1;
-
-      let date = new Date(2026, m, d);
-
-      let day = date.getDay();
-
-      return day === 0 || day === 6;
-
-    }
-
-
-
-    function isFutureOrToday(text) {
-
-      let p = text.split(".");
-
-      if (p.length < 2) return true;
-
-      let d = parseInt(p[0]);
-      let m = parseInt(p[1]) - 1;
-
-      let date = new Date(2026, m, d);
-
-      let today = new Date();
-
-      today.setHours(0, 0, 0, 0);
-
-      return date >= today;
-
-    }
-
-
-
-    function draw() {
-
-      let t = document.getElementById("t");
-
-      t.innerHTML = "";
-
-      if (!data.length) return;
-
-
-      let visibleCols = [];
-
-
-      for (let c = 0; c < data[0].length; c++) {
-
-        if (c === 0) {
-          visibleCols.push(c);
-          continue;
-        }
-
-        if (isFutureOrToday(data[0][c])) {
-          visibleCols.push(c);
-        }
-
-      }
-
-
-      let counts = new Array(data[0].length).fill(0);
-
-
-      for (let r = 2; r < data.length; r++) {
-
-        for (let c = 1; c < data[0].length; c++) {
-
-          if (data[r][c] === "ja") {
-            counts[c]++;
-          }
-
-        }
-
-      }
-
-
-      let trHead = document.createElement("tr");
-
-
-      visibleCols.forEach(c => {
-
-        let th = document.createElement("th");
-
-        let val = data[0][c] || "";
-
-        th.textContent = val;
-
-        if (isWeekend(val)) {
-          th.classList.add("weekend");
-        }
-
-        trHead.appendChild(th);
-
-      });
-
-
-      t.appendChild(trHead);
-
-
-      let trType = document.createElement("tr");
-
-
-      visibleCols.forEach(c => {
-
-        let td = document.createElement("td");
-
-        let val = data[1]?.[c] || "";
-
-        td.textContent = val;
-
-        if (c === 0) td.className = "name";
-
-        td.style.fontSize = "12px";
-        td.style.color = "#555";
-
-        trType.appendChild(td);
-
-      });
-
-
-      t.appendChild(trType);
-
-
-      let trTotal = document.createElement("tr");
-
-
-      visibleCols.forEach(c => {
-
-        let td = document.createElement("td");
-
-        if (c === 0) {
-          td.textContent = "Total";
-          td.className = "name total";
-        }
-        else {
-          td.textContent = counts[c];
-          td.className = "count";
-        }
-
-        trTotal.appendChild(td);
-
-      });
-
-
-      t.appendChild(trTotal);
-
-
-
-      for (let r = 2; r < data.length; r++) {
-
-        let tr = document.createElement("tr");
-
-
-        visibleCols.forEach(c => {
-
-          let td = document.createElement("td");
-
-          let val = data[r][c] || "";
-
-
-          if (c === 0) {
-
-            td.textContent = val;
-            td.className = "name";
-
-          }
-
-          else {
-
-          td.textContent = val;
-
-          td.onclick = () => {
-          
-            let order = ["", "ja", "ev", "nein"];
-          
-            let i = order.indexOf(data[r][c]);
-          
-            i++;
-          
-            if (i >= order.length) i = 0;
-          
-            data[r][c] = order[i];
-          
-            draw();
-          
-            autoSave();
-
+<div class="scroll-x">
+<table id="t"></table>
+</div>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
+  authDomain: "goldies-89ea2.firebaseapp.com",
+  projectId: "goldies-89ea2"
 };
 
+firebase.initializeApp(firebaseConfig);
 
-            if (val === "ja") td.classList.add("ja");
-            if (val === "ev") td.classList.add("ev");
-            if (val === "nein") td.classList.add("nein");
+const db = firebase.firestore();
 
-          }
+let data = [];
+let initialized = false;
+
+let saveTimer = null;
+
+function autoSave() {
+
+  if (!initialized) return;
+
+  clearTimeout(saveTimer);
+
+  saveTimer = setTimeout(save, 500);
+
+}
 
 
-          tr.appendChild(td);
+
+function loadCSV() {
+
+  return new Promise(resolve => {
+
+    Papa.parse("./teilnahmen.csv", {
+
+      download: true,
+
+      complete: (res) => {
+
+        let rows = res.data;
+
+        rows = rows.filter(r =>
+          r && r.some(v => v && v.trim() !== "")
+        );
+
+        let max = 0;
+
+        rows.forEach(r => {
+          if (r.length > max) max = r.length;
+        });
+
+        rows = rows.map(r => {
+
+          while (r.length < max) r.push("");
+
+          return r;
 
         });
 
-
-        t.appendChild(tr);
+        resolve(rows);
 
       }
 
+    });
 
-      let trBottom = document.createElement("tr");
+  });
 
-
-      visibleCols.forEach(c => {
-
-        let th = document.createElement("th");
-
-        let val = data[0][c] || "";
-
-        th.textContent = val;
-
-        if (isWeekend(val)) {
-          th.classList.add("weekend");
-        }
-
-        trBottom.appendChild(th);
-
-      });
+}
 
 
-      t.appendChild(trBottom);
+
+function mergeData(csv, dbData) {
+
+  let result = [];
+
+  let rows = csv.length;
+  let cols = csv[0].length;
+
+  for (let r = 0; r < rows; r++) {
+
+    result[r] = [];
+
+    for (let c = 0; c < cols; c++) {
+
+      let csvVal = csv[r]?.[c] ?? "";
+      let dbVal = dbData?.[r]?.[c] ?? "";
+
+      if (r === 0) result[r][c] = csvVal;
+      else if (r === 1) result[r][c] = csvVal;
+      else if (c === 0) result[r][c] = csvVal;
+      else result[r][c] = dbVal || "";
+
+    }
+
+  }
+
+  return result;
+
+}
 
 
-      let trTypeBottom = document.createElement("tr");
+
+function isWeekend(text) {
+
+  let p = text.split(".");
+  if (p.length < 2) return false;
+
+  let d = parseInt(p[0]);
+  let m = parseInt(p[1]) - 1;
+
+  let date = new Date(2026, m, d);
+
+  let day = date.getDay();
+
+  return day === 0 || day === 6;
+
+}
 
 
-      visibleCols.forEach(c => {
 
-        let td = document.createElement("td");
+function isToday(text) {
 
-        let val = data[1]?.[c] || "";
+  let p = text.split(".");
+  if (p.length < 2) return false;
+
+  let d = parseInt(p[0]);
+  let m = parseInt(p[1]) - 1;
+
+  let today = new Date();
+
+  let date = new Date(today.getFullYear(), m, d);
+
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth()
+  );
+
+}
+
+
+
+function isFutureOrToday(text) {
+
+  let p = text.split(".");
+  if (p.length < 2) return true;
+
+  let d = parseInt(p[0]);
+  let m = parseInt(p[1]) - 1;
+
+  let date = new Date(2026, m, d);
+
+  let today = new Date();
+  today.setHours(0,0,0,0);
+
+  return date >= today;
+
+}
+
+
+
+function draw() {
+
+  let t = document.getElementById("t");
+
+  t.innerHTML = "";
+
+  if (!data.length) return;
+
+
+  let visibleCols = [];
+
+  for (let c = 0; c < data[0].length; c++) {
+
+    if (c === 0) {
+      visibleCols.push(c);
+      continue;
+    }
+
+    if (isFutureOrToday(data[0][c])) {
+      visibleCols.push(c);
+    }
+
+  }
+
+
+  let counts = new Array(data[0].length).fill(0);
+
+  for (let r = 2; r < data.length; r++) {
+
+    for (let c = 1; c < data[0].length; c++) {
+
+      if (data[r][c] === "ja") {
+        counts[c]++;
+      }
+
+    }
+
+  }
+
+
+  let trHead = document.createElement("tr");
+
+  visibleCols.forEach(c => {
+
+    let th = document.createElement("th");
+
+    let val = data[0][c] || "";
+
+    th.textContent = val;
+
+    if (isWeekend(val)) th.classList.add("weekend");
+    if (isToday(val)) th.classList.add("today");
+
+    trHead.appendChild(th);
+
+  });
+
+  t.appendChild(trHead);
+
+
+
+  let trType = document.createElement("tr");
+
+  visibleCols.forEach(c => {
+
+    let td = document.createElement("td");
+
+    let val = data[1]?.[c] || "";
+
+    td.textContent = val;
+
+    if (c === 0) td.className = "name";
+
+    td.style.fontSize = "12px";
+    td.style.color = "#555";
+
+    trType.appendChild(td);
+
+  });
+
+  t.appendChild(trType);
+
+
+
+  let trTotal = document.createElement("tr");
+
+  visibleCols.forEach(c => {
+
+    let td = document.createElement("td");
+
+    if (c === 0) {
+      td.textContent = "Total";
+      td.className = "name";
+    } else {
+      td.textContent = counts[c];
+      td.className = "count";
+    }
+
+    trTotal.appendChild(td);
+
+  });
+
+  t.appendChild(trTotal);
+
+
+
+  for (let r = 2; r < data.length; r++) {
+
+    let tr = document.createElement("tr");
+
+    visibleCols.forEach(c => {
+
+      let td = document.createElement("td");
+
+      let val = data[r][c] || "";
+
+      if (c === 0) {
 
         td.textContent = val;
+        td.className = "name";
 
-        if (c === 0) td.className = "name";
+      } else {
 
-        td.style.fontSize = "12px";
-        td.style.color = "#555";
+        td.textContent = "";
 
-        trTypeBottom.appendChild(td);
+        td.onclick = () => {
 
-      });
+          let order = ["", "ja", "ev", "nein"];
 
+          let i = order.indexOf(data[r][c]);
 
-      t.appendChild(trTypeBottom);
+          i++;
 
-    }
+          if (i >= order.length) i = 0;
 
+          data[r][c] = order[i];
 
+          draw();
+          autoSave();
 
-    async function load() {
+        };
 
-      let csv = await loadCSV();
-
-      let dbData = null;
-
-      try {
-
-        let doc = await db.collection("training").doc("list").get();
-
-        if (doc.exists) {
-
-          dbData = JSON.parse(doc.data().json);
-
-        }
+        if (val === "ja") td.classList.add("ja");
+        if (val === "ev") td.classList.add("ev");
+        if (val === "nein") td.classList.add("nein");
 
       }
-      catch (e) { }
+
+      tr.appendChild(td);
+
+    });
+
+    t.appendChild(tr);
+
+  }
 
 
-      data = mergeData(csv, dbData);
 
-      await save();
+  let trBottom = document.createElement("tr");
 
-      initialized = true;
+  visibleCols.forEach(c => {
 
-      draw();
+    let th = document.createElement("th");
 
+    let val = data[0][c] || "";
+
+    th.textContent = val;
+
+    if (isWeekend(val)) th.classList.add("weekend");
+    if (isToday(val)) th.classList.add("today");
+
+    trBottom.appendChild(th);
+
+  });
+
+  t.appendChild(trBottom);
+
+
+
+  let trTypeBottom = document.createElement("tr");
+
+  visibleCols.forEach(c => {
+
+    let td = document.createElement("td");
+
+    let val = data[1]?.[c] || "";
+
+    td.textContent = val;
+
+    if (c === 0) td.className = "name";
+
+    td.style.fontSize = "12px";
+    td.style.color = "#555";
+
+    trTypeBottom.appendChild(td);
+
+  });
+
+  t.appendChild(trTypeBottom);
+
+}
+
+
+
+async function load() {
+
+  let csv = await loadCSV();
+
+  let dbData = null;
+
+  try {
+
+    let doc = await db.collection("training").doc("list").get();
+
+    if (doc.exists) {
+      dbData = JSON.parse(doc.data().json);
     }
 
+  } catch (e) {}
+
+  data = mergeData(csv, dbData);
+
+  await save();
+
+  initialized = true;
+
+  draw();
+
+}
 
 
-    async function save() {
 
-      await db.collection("training").doc("list").set({
-        json: JSON.stringify(data)
-      });
+async function save() {
 
-    }
+  await db.collection("training").doc("list").set({
+    json: JSON.stringify(data)
+  });
 
-
-    load();
+}
 
 
-  </script>
+load();
+
+</script>
 
 </body>
-
 </html>
