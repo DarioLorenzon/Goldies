@@ -52,9 +52,9 @@ th:first-child {
   background: white;
 }
 
-.ja { background: #8f8; }
-.ev { background: #ff8; }
-.nein { background: #f7caca; }
+.ja {}
+.ev {}
+.nein {}
 
 .count {
   background: #f5f5f5;
@@ -77,6 +77,25 @@ th:first-child {
   0%   { transform: scale(0.9); }
   50%  { transform: scale(1.1); }
   100% { transform: scale(1); }
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin: auto;
+}
+
+.dot-ja {
+  background: #3ccf5a;
+}
+
+.dot-ev {
+  background: #ffd84d;
+}
+
+.dot-nein {
+  background: #ff5a5a;
 }
   
 </style>
@@ -318,7 +337,7 @@ function draw() {
 
     let val = data[1]?.[c] || "";
 
-    td.textContent = val;
+    td.innerHTML = val;
 
     if (c === 0) td.className = "name";
 
@@ -402,9 +421,19 @@ function draw() {
       
       };
 
-        if (val === "ja") td.classList.add("ja");
-        if (val === "ev") td.classList.add("ev");
-        if (val === "nein") td.classList.add("nein");
+      if (val) {
+
+      let dot = document.createElement("div");
+    
+      dot.className = "dot";
+    
+      if (val === "ja") dot.classList.add("dot-ja");
+      if (val === "ev") dot.classList.add("dot-ev");
+      if (val === "nein") dot.classList.add("dot-nein");
+    
+      td.appendChild(dot);
+
+}
 
       }
 
