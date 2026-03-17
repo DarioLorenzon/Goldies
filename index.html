@@ -13,29 +13,49 @@
 
 <style>
 
+/* =====================================
+   GENERAL
+===================================== */
+
 body {
   margin: 0;
   font-family: Arial;
   font-size: 14px;
 }
 
+
+/* =====================================
+   LAYOUT
+===================================== */
+
 .scroll-x {
   overflow: auto;
   width: 100%;
 }
+
+
+/* =====================================
+   TABLE
+===================================== */
 
 table {
   border-collapse: collapse;
   width: max-content;
 }
 
-td, th {
+td,
+th {
   border: 1px solid #999;
   padding: 4px;
   min-width: 40px;
   text-align: center;
   background: white;
 }
+
+
+/* =====================================
+   NAME COLUMN
+===================================== */
 
 .name {
   position: sticky;
@@ -52,14 +72,20 @@ th:first-child {
   background: white;
 }
 
-.ja {}
-.ev {}
-.nein {}
+
+/* =====================================
+   TOTAL ROW
+===================================== */
 
 .count {
   background: #f5f5f5;
   font-size: 12px;
 }
+
+
+/* =====================================
+   WEEKEND / TODAY
+===================================== */
 
 .weekend {
   background: #e6ccff;
@@ -69,15 +95,10 @@ th:first-child {
   background: #dbeeff;
 }
 
-.tap {
-  animation: tapAnim 0.2s ease;
-}
 
-@keyframes tapAnim {
-  0%   { transform: scale(0.9); }
-  50%  { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
+/* =====================================
+   DOTS (ja / ev / nein)
+===================================== */
 
 .dot {
   width: 14px;
@@ -97,7 +118,32 @@ th:first-child {
 .dot-nein {
   background: #ff5a5a;
 }
-  
+
+
+/* =====================================
+   TAP ANIMATION
+===================================== */
+
+.tap {
+  animation: tapAnim 0.15s ease;
+}
+
+@keyframes tapAnim {
+
+  0% {
+    transform: scale(0.9);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+
+}
+
 </style>
 
 </head>
