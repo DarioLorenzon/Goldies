@@ -69,6 +69,16 @@ th:first-child {
   background: #dbeeff;
 }
 
+.tap {
+  animation: tapAnim 0.2s ease;
+}
+
+@keyframes tapAnim {
+  0%   { transform: scale(0.9); }
+  50%  { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+  
 </style>
 
 </head>
@@ -366,20 +376,27 @@ function draw() {
 
         td.onclick = () => {
 
-          let order = ["", "ja", "ev", "nein"];
-
-          let i = order.indexOf(data[r][c]);
-
-          i++;
-
-          if (i >= order.length) i = 0;
-
-          data[r][c] = order[i];
-
-          draw();
-          autoSave();
-
-        };
+        td.classList.add("tap");
+      
+        setTimeout(() => {
+          td.classList.remove("tap");
+        }, 150);
+      
+      
+        let order = ["", "ja", "ev", "nein"];
+      
+        let i = order.indexOf(data[r][c]);
+      
+        i++;
+      
+        if (i >= order.length) i = 0;
+      
+        data[r][c] = order[i];
+      
+        draw();
+        autoSave();
+      
+      };
 
         if (val === "ja") td.classList.add("ja");
         if (val === "ev") td.classList.add("ev");
