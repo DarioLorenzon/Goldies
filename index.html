@@ -415,35 +415,25 @@
 
           else {
 
-            let s = document.createElement("select");
+          td.textContent = val;
 
+          td.onclick = () => {
+          
+            let order = ["", "ja", "ev", "nein"];
+          
+            let i = order.indexOf(data[r][c]);
+          
+            i++;
+          
+            if (i >= order.length) i = 0;
+          
+            data[r][c] = order[i];
+          
+            draw();
+          
+            autoSave();
 
-            ["", "ja", "ev", "nein"].forEach(v => {
-
-              let o = document.createElement("option");
-
-              o.value = v;
-              o.text = v;
-
-              if (val === v) o.selected = true;
-
-              s.appendChild(o);
-
-            });
-
-
-            s.onchange = () => {
-
-              data[r][c] = s.value;
-
-              draw();
-
-              autoSave();
-
-            };
-
-
-            td.appendChild(s);
+};
 
 
             if (val === "ja") td.classList.add("ja");
