@@ -1,25 +1,32 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
 
+<head>
+
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
 
   <!-- =========================
        PapaParse
   ========================= -->
+
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
 
   <!-- =========================
        Firebase
   ========================= -->
+
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 
 
   <!-- =========================
        STYLE
   ========================= -->
+
   <style>
 
     body {
@@ -28,15 +35,18 @@
       font-size: 14px;
     }
 
+
     .scroll-x {
       overflow: auto;
       width: 100%;
     }
 
+
     table {
       border-collapse: collapse;
       width: max-content;
     }
+
 
     td,
     th {
@@ -47,10 +57,6 @@
       background: white;
     }
 
-
-    /* =========================
-       NAME COLUMN
-    ========================= */
 
     .name {
       position: sticky;
@@ -63,10 +69,6 @@
     }
 
 
-    /* =========================
-       FIRST HEADER CELL
-    ========================= */
-
     th:first-child {
       position: sticky;
       left: 0;
@@ -74,20 +76,12 @@
     }
 
 
-    /* =========================
-       DROPDOWN
-    ========================= */
-
     select {
       font-size: 12px;
       padding: 1px 2px;
       height: 20px;
     }
 
-
-    /* =========================
-       COLORS
-    ========================= */
 
     .ja {
       background: #8f8;
@@ -102,25 +96,18 @@
     }
 
 
-    /* =========================
-       TOTAL
-    ========================= */
-
     .count {
       background: #f5f5f5;
       font-size: 12px;
       color: #444;
     }
 
+
     .total {
       font-size: 12px;
       color: #555;
     }
 
-
-    /* =========================
-       WEEKEND
-    ========================= */
 
     .weekend {
       background: #e6ccff;
@@ -131,6 +118,7 @@
 </head>
 
 
+
 <body>
 
   <div class="scroll-x">
@@ -138,602 +126,439 @@
   </div>
 
 
+
   <script>
 
 
-  /* =====================================
-     FIREBASE CONFIG
-  ===================================== */
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
-    authDomain: "goldies-89ea2.firebaseapp.com",
-    projectId: "goldies-89ea2"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-
-  const db = firebase.firestore();
+    const firebaseConfig = {
+      apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
+      authDomain: "goldies-89ea2.firebaseapp.com",
+      projectId: "goldies-89ea2"
+    };
 
 
+    firebase.initializeApp(firebaseConfig);
 
-  /* =====================================
-     GLOBAL DATA
-  ===================================== */
-
-  let data = [];
-  let initialized = false;
+    const db = firebase.firestore();
 
 
-
-  /* =====================================
-     AUTOSAVE TIMER
-  ===================================== */
-
-  let saveTimer = null;
-
-  function autoSave() {
-
-    if (!initialized) return;
-
-    clearTimeout(saveTimer);
-
-    saveTimer = setTimeout(save, 800);
-
-  }
+    let data = [];
+    let initialized = false;
 
 
-  
-/* =====================================
-   LOAD CSV
-   lädt teilnahmen.csv und entfernt
-   leere Zeilen am Ende
-===================================== */
-
-function loadCSV() {
-
-  return new Promise(resolve => {
-
-    Papa.parse("./teilnahmen.csv", {
-
-      download: true,
-
-      complete: (res) => {
-
-        let rows = res.data;
+    let saveTimer = null;
 
 
-        /* -----------------------------
-           leere Zeilen entfernen
-        ----------------------------- */
+    function autoSave() {
 
-        rows = rows.filter(r => {
+      if (!initialized) return;
 
-          if (!r) return false;
+      clearTimeout(saveTimer);
 
-          return r.some(v => v && v.trim() !== "");
+      saveTimer = setTimeout(save, 800);
 
-        });
+    }
 
 
-        /* -----------------------------
-           gleiche Spaltenlänge
-        ----------------------------- */
 
-        let max = 0;
+    function loadCSV() {
 
-        rows.forEach(r => {
-          if (r.length > max) max = r.length;
-        });
+      return new Promise(resolve => {
 
-        rows = rows.map(r => {
+        Papa.parse("./teilnahmen.csv", {
 
-          while (r.length < max) {
-            r.push("");
+          download: true,
+
+          complete: (res) => {
+
+            let rows = res.data;
+
+
+            rows = rows.filter(r =>
+              r && r.some(v => v && v.trim() !== "")
+            );
+
+
+            let max = 0;
+
+            rows.forEach(r => {
+              if (r.length > max) max = r.length;
+            });
+
+
+            rows = rows.map(r => {
+
+              while (r.length < max) r.push("");
+
+              return r;
+
+            });
+
+
+            resolve(rows);
+
           }
 
-          return r;
-
         });
 
-        resolve(rows);
+      });
+
+    }
+
+
+
+    function mergeData(csv, dbData) {
+
+      let result = [];
+
+      let rows = csv.length;
+      let cols = csv[0].length;
+
+
+      for (let r = 0; r < rows; r++) {
+
+        result[r] = [];
+
+        for (let c = 0; c < cols; c++) {
+
+          let csvVal = csv[r]?.[c] ?? "";
+          let dbVal = dbData?.[r]?.[c] ?? "";
+
+
+          if (r === 0) result[r][c] = csvVal;
+          else if (r === 1) result[r][c] = csvVal;
+          else if (c === 0) result[r][c] = csvVal;
+          else result[r][c] = dbVal || "";
+
+        }
 
       }
 
-    });
+      return result;
 
-  });
-
-}
+    }
 
 
 
-/* =====================================
-   MERGE CSV + FIREBASE
-   Struktur:
+    function isWeekend(text) {
 
-   0 = Datum
-   1 = Typ
-   2+ = Spieler
-===================================== */
+      let p = text.split(".");
 
-function mergeData(csv, dbData) {
+      if (p.length < 2) return false;
 
-  let result = [];
+      let d = parseInt(p[0]);
+      let m = parseInt(p[1]) - 1;
 
-  let rows = csv.length;
-  let cols = csv[0].length;
+      let date = new Date(2026, m, d);
 
+      let day = date.getDay();
 
-  for (let r = 0; r < rows; r++) {
+      return day === 0 || day === 6;
 
-    result[r] = [];
-
-    for (let c = 0; c < cols; c++) {
-
-      let csvVal = csv[r]?.[c] ?? "";
-      let dbVal = dbData?.[r]?.[c] ?? "";
+    }
 
 
-      /* -----------------------------
-         Datum
-      ----------------------------- */
 
-      if (r === 0) {
+    function isFutureOrToday(text) {
 
-        result[r][c] = csvVal;
+      let p = text.split(".");
+
+      if (p.length < 2) return true;
+
+      let d = parseInt(p[0]);
+      let m = parseInt(p[1]) - 1;
+
+      let date = new Date(2026, m, d);
+
+      let today = new Date();
+
+      today.setHours(0, 0, 0, 0);
+
+      return date >= today;
+
+    }
+
+
+
+    function draw() {
+
+      let t = document.getElementById("t");
+
+      t.innerHTML = "";
+
+      if (!data.length) return;
+
+
+      let visibleCols = [];
+
+
+      for (let c = 0; c < data[0].length; c++) {
+
+        if (c === 0) {
+          visibleCols.push(c);
+          continue;
+        }
+
+        if (isFutureOrToday(data[0][c])) {
+          visibleCols.push(c);
+        }
 
       }
 
-      /* -----------------------------
-         Typ
-      ----------------------------- */
 
-      else if (r === 1) {
+      let counts = new Array(data[0].length).fill(0);
 
-        result[r][c] = csvVal;
 
-      }
+      for (let r = 2; r < data.length; r++) {
 
-      /* -----------------------------
-         Name
-      ----------------------------- */
+        for (let c = 1; c < data[0].length; c++) {
 
-      else if (c === 0) {
+          if (data[r][c] === "ja") {
+            counts[c]++;
+          }
 
-        result[r][c] = csvVal;
+        }
 
       }
 
-      /* -----------------------------
-         Werte aus Firebase
-      ----------------------------- */
 
-      else {
+      let trHead = document.createElement("tr");
 
-        result[r][c] = dbVal || "";
 
-      }
+      visibleCols.forEach(c => {
 
-    }
+        let th = document.createElement("th");
 
-  }
+        let val = data[0][c] || "";
 
-  return result;
+        th.textContent = val;
 
-}
+        if (isWeekend(val)) {
+          th.classList.add("weekend");
+        }
 
+        trHead.appendChild(th);
 
+      });
 
-/* =====================================
-   WEEKEND CHECK
-===================================== */
 
-function isWeekend(text) {
+      t.appendChild(trHead);
 
-  let p = text.split(".");
 
-  if (p.length < 2) return false;
+      let trType = document.createElement("tr");
 
-  let d = parseInt(p[0]);
-  let m = parseInt(p[1]) - 1;
 
-  let date = new Date(2026, m, d);
+      visibleCols.forEach(c => {
 
-  let day = date.getDay();
+        let td = document.createElement("td");
 
-  return day === 0 || day === 6;
-
-}
-
-
-
-/* =====================================
-   FUTURE FILTER
-   zeigt nur heute + Zukunft
-===================================== */
-
-function isFutureOrToday(text) {
-
-  let p = text.split(".");
-
-  if (p.length < 2) return true;
-
-  let d = parseInt(p[0]);
-  let m = parseInt(p[1]) - 1;
-
-  let date = new Date(2026, m, d);
-
-  let today = new Date();
-
-  today.setHours(0, 0, 0, 0);
-
-  return date >= today;
-
-}
-
-
-
-/* =====================================
-   DRAW TABLE
-
-   Aufbau:
-
-   Datum
-   Typ
-   Total
-   Spieler
-   Spieler
-   Datum unten
-   Typ unten
-
-===================================== */
-
-function draw() {
-
-  let t = document.getElementById("t");
-
-  t.innerHTML = "";
-
-  if (!data.length) return;
-
-
-  /* -----------------------------
-     sichtbare Spalten bestimmen
-  ----------------------------- */
-
-  let visibleCols = [];
-
-  for (let c = 0; c < data[0].length; c++) {
-
-    if (c === 0) {
-
-      visibleCols.push(c);
-      continue;
-
-    }
-
-    let val = data[0][c];
-
-    if (isFutureOrToday(val)) {
-
-      visibleCols.push(c);
-
-    }
-
-  }
-
-
-  /* -----------------------------
-     counts berechnen
-  ----------------------------- */
-
-  let counts = new Array(data[0].length).fill(0);
-
-  for (let r = 2; r < data.length; r++) {
-
-    for (let c = 1; c < data[0].length; c++) {
-
-      if (data[r][c] === "ja") {
-
-        counts[c]++;
-
-      }
-
-    }
-
-  }
-
-
-  /* =====================================
-     HEADER DATUM
-  ===================================== */
-
-  let trHead = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let th = document.createElement("th");
-
-    let val = data[0][c] || "";
-
-    th.textContent = val;
-
-    if (isWeekend(val)) {
-
-      th.classList.add("weekend");
-
-    }
-
-    trHead.appendChild(th);
-
-  });
-
-  t.appendChild(trHead);
-
-
-  /* =====================================
-     HEADER TYP
-  ===================================== */
-
-  let trType = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let td = document.createElement("td");
-
-    let val = data[1]?.[c] || "";
-
-    td.textContent = val;
-
-    td.style.fontSize = "12px";
-    td.style.color = "#555";
-
-    if (c === 0) {
-
-      td.className = "name";
-
-    }
-
-    trType.appendChild(td);
-
-  });
-
-  t.appendChild(trType);
-
-
-  /* =====================================
-     TOTAL
-  ===================================== */
-
-  let trTotal = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let td = document.createElement("td");
-
-    if (c === 0) {
-
-      td.textContent = "Total";
-      td.className = "name total";
-
-    } else {
-
-      td.textContent = counts[c];
-      td.className = "count";
-
-    }
-
-    trTotal.appendChild(td);
-
-  });
-
-  t.appendChild(trTotal);
-
-
-  /* =====================================
-     SPIELER
-  ===================================== */
-
-  for (let r = 2; r < data.length; r++) {
-
-    let tr = document.createElement("tr");
-
-    visibleCols.forEach(c => {
-
-      let td = document.createElement("td");
-
-      let val = data[r][c] || "";
-
-
-      if (c === 0) {
+        let val = data[1]?.[c] || "";
 
         td.textContent = val;
-        td.className = "name";
 
-      }
+        if (c === 0) td.className = "name";
 
-      else {
+        td.style.fontSize = "12px";
+        td.style.color = "#555";
 
-        let s = document.createElement("select");
+        trType.appendChild(td);
 
-        ["", "ja", "ev", "nein"].forEach(v => {
+      });
 
-          let o = document.createElement("option");
 
-          o.value = v;
-          o.text = v;
+      t.appendChild(trType);
 
-          if (val === v) {
-            o.selected = true;
+
+      let trTotal = document.createElement("tr");
+
+
+      visibleCols.forEach(c => {
+
+        let td = document.createElement("td");
+
+        if (c === 0) {
+          td.textContent = "Total";
+          td.className = "name total";
+        }
+        else {
+          td.textContent = counts[c];
+          td.className = "count";
+        }
+
+        trTotal.appendChild(td);
+
+      });
+
+
+      t.appendChild(trTotal);
+
+
+
+      for (let r = 2; r < data.length; r++) {
+
+        let tr = document.createElement("tr");
+
+
+        visibleCols.forEach(c => {
+
+          let td = document.createElement("td");
+
+          let val = data[r][c] || "";
+
+
+          if (c === 0) {
+
+            td.textContent = val;
+            td.className = "name";
+
           }
 
-          s.appendChild(o);
+          else {
+
+            let s = document.createElement("select");
+
+
+            ["", "ja", "ev", "nein"].forEach(v => {
+
+              let o = document.createElement("option");
+
+              o.value = v;
+              o.text = v;
+
+              if (val === v) o.selected = true;
+
+              s.appendChild(o);
+
+            });
+
+
+            s.onchange = () => {
+
+              data[r][c] = s.value;
+
+              draw();
+
+              autoSave();
+
+            };
+
+
+            td.appendChild(s);
+
+
+            if (val === "ja") td.classList.add("ja");
+            if (val === "ev") td.classList.add("ev");
+            if (val === "nein") td.classList.add("nein");
+
+          }
+
+
+          tr.appendChild(td);
 
         });
 
-        s.onchange = () => {
 
-          data[r][c] = s.value;
-
-          draw();
-
-          autoSave();
-
-        };
-
-        td.appendChild(s);
-
-
-        if (val === "ja") td.classList.add("ja");
-        if (val === "ev") td.classList.add("ev");
-        if (val === "nein") td.classList.add("nein");
+        t.appendChild(tr);
 
       }
 
-      tr.appendChild(td);
 
-    });
-
-    t.appendChild(tr);
-
-  }
+      let trBottom = document.createElement("tr");
 
 
-  /* =====================================
-     DATUM UNTEN
-  ===================================== */
+      visibleCols.forEach(c => {
 
-  let trBottom = document.createElement("tr");
+        let th = document.createElement("th");
 
-  visibleCols.forEach(c => {
+        let val = data[0][c] || "";
 
-    let th = document.createElement("th");
+        th.textContent = val;
 
-    let val = data[0][c] || "";
+        if (isWeekend(val)) {
+          th.classList.add("weekend");
+        }
 
-    th.textContent = val;
+        trBottom.appendChild(th);
 
-    if (isWeekend(val)) {
-
-      th.classList.add("weekend");
-
-    }
-
-    trBottom.appendChild(th);
-
-  });
-
-  t.appendChild(trBottom);
+      });
 
 
-  /* =====================================
-     TYP UNTEN
-  ===================================== */
+      t.appendChild(trBottom);
 
-  let trTypeBottom = document.createElement("tr");
 
-  visibleCols.forEach(c => {
+      let trTypeBottom = document.createElement("tr");
 
-    let td = document.createElement("td");
 
-    let val = data[1]?.[c] || "";
+      visibleCols.forEach(c => {
 
-    td.textContent = val;
+        let td = document.createElement("td");
 
-    td.style.fontSize = "12px";
-    td.style.color = "#555";
+        let val = data[1]?.[c] || "";
 
-    if (c === 0) {
+        td.textContent = val;
 
-      td.className = "name";
+        if (c === 0) td.className = "name";
+
+        td.style.fontSize = "12px";
+        td.style.color = "#555";
+
+        trTypeBottom.appendChild(td);
+
+      });
+
+
+      t.appendChild(trTypeBottom);
 
     }
 
-    trTypeBottom.appendChild(td);
-
-  });
-
-  t.appendChild(trTypeBottom);
-
-}
 
 
-/* =====================================
-   LOAD DATA
+    async function load() {
 
-   1. CSV laden
-   2. Firebase lesen
-   3. merge
-   4. speichern
-   5. draw
-===================================== */
+      let csv = await loadCSV();
 
-async function load() {
+      let dbData = null;
 
-  let csv = await loadCSV();
+      try {
 
-  let dbData = null;
+        let doc = await db.collection("training").doc("list").get();
 
-  try {
+        if (doc.exists) {
 
-    let doc = await db
-      .collection("training")
-      .doc("list")
-      .get();
+          dbData = JSON.parse(doc.data().json);
 
-    if (doc.exists) {
+        }
 
-      dbData = JSON.parse(
-        doc.data().json
-      );
+      }
+      catch (e) { }
+
+
+      data = mergeData(csv, dbData);
+
+      await save();
+
+      initialized = true;
+
+      draw();
 
     }
 
-  }
-  catch (e) {
-
-    console.log("no firebase data");
-
-  }
 
 
-  data = mergeData(csv, dbData);
+    async function save() {
+
+      await db.collection("training").doc("list").set({
+        json: JSON.stringify(data)
+      });
+
+    }
 
 
-  await save();
-
-  initialized = true;
-
-  draw();
-
-}
+    load();
 
 
+  </script>
 
-/* =====================================
-   SAVE TO FIREBASE
-===================================== */
+</body>
 
-async function save() {
-
-  await db
-    .collection("training")
-    .doc("list")
-    .set({
-
-      json: JSON.stringify(data)
-
-    });
-
-}
-
-
-
-/* =====================================
-   START
-===================================== */
-
-load();
-      
-      
+</html>
