@@ -13,7 +13,9 @@
 
 <style>
 
-/* ===== GENERAL ===== */
+/* =====================================
+   GENERAL
+===================================== */
 
 body {
   margin: 0;
@@ -21,19 +23,26 @@ body {
   font-size: 14px;
 }
 
+/* =====================================
+   LAYOUT
+===================================== */
+
 .scroll-x {
   overflow: auto;
   width: 100%;
 }
 
-/* ===== TABLE ===== */
+/* =====================================
+   TABLE
+===================================== */
 
 table {
   border-collapse: collapse;
   width: max-content;
 }
 
-td, th {
+td,
+th {
   border: 1px solid #999;
   padding: 6px;
   min-width: 40px;
@@ -41,7 +50,9 @@ td, th {
   background: white;
 }
 
-/* ===== NAME ===== */
+/* =====================================
+   NAME COLUMN
+===================================== */
 
 .name {
   position: sticky;
@@ -52,14 +63,24 @@ td, th {
   padding-left: 4px;
 }
 
-/* ===== TOTAL ===== */
+th:first-child {
+  position: sticky;
+  left: 0;
+  background: white;
+}
+
+/* =====================================
+   TOTAL ROW
+===================================== */
 
 .count {
   background: #f5f5f5;
   font-size: 12px;
 }
 
-/* ===== MARK ===== */
+/* =====================================
+   WEEKEND / TODAY
+===================================== */
 
 .weekend {
   background: #f2e9ff;
@@ -69,7 +90,9 @@ td, th {
   background: #dbeeff;
 }
 
-/* ===== DOT ===== */
+/* =====================================
+   DOTS
+===================================== */
 
 .dot {
   width: 14px;
@@ -82,7 +105,9 @@ td, th {
 .dot-ev { background:#ffd84d; }
 .dot-nein { background:#ff5a5a; }
 
-/* ===== TAP ===== */
+/* =====================================
+   TAP
+===================================== */
 
 .tap {
   animation: tapAnim 0.15s ease;
@@ -94,13 +119,15 @@ td, th {
   100% { transform: scale(1); }
 }
 
-/* ===== COMMENT POPUP ===== */
+/* =====================================
+   COMMENT POPUP
+===================================== */
 
 #commentBox {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%,-50%);
   background: white;
   border: 1px solid #999;
   padding: 10px;
@@ -118,13 +145,12 @@ td, th {
 <table id="t"></table>
 </div>
 
-
 <div id="commentBox">
 
 <div id="commentTitle"></div>
 
 <textarea id="commentText"
-style="width:250px;height:100px;"></textarea>
+style="width:260px;height:120px;"></textarea>
 
 <br><br>
 
@@ -133,10 +159,7 @@ style="width:250px;height:100px;"></textarea>
 
 </div>
 
-
 <script>
-
-/* ================= FIREBASE ================= */
 
 const firebaseConfig = {
   apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
@@ -148,19 +171,13 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
-
-/* ================= GLOBAL ================= */
-
 let data = [];
 let comments = {};
-
 let currentCommentDate = null;
 
 let initialized = false;
+
 let saveTimer = null;
-
-
-/* ================= AUTOSAVE ================= */
 
 function autoSave() {
 
@@ -175,7 +192,7 @@ function autoSave() {
 
 /* ================= COMMENT ================= */
 
-function openComment(date) {
+function openComment(date){
 
   currentCommentDate = date;
 
@@ -185,22 +202,20 @@ function openComment(date) {
   document.getElementById("commentText").value =
     comments[date] || "";
 
-  document.getElementById("commentBox").style.display = "block";
+  document.getElementById("commentBox").style.display="block";
 
 }
 
-function closeComment() {
+function closeComment(){
 
-  document.getElementById("commentBox").style.display = "none";
+  document.getElementById("commentBox").style.display="none";
 
 }
 
-function saveComment() {
+function saveComment(){
 
-  let txt =
+  comments[currentCommentDate] =
     document.getElementById("commentText").value;
-
-  comments[currentCommentDate] = txt;
 
   closeComment();
 
@@ -253,8 +268,6 @@ function loadCSV() {
 }
 
 
-/* ================= MERGE ================= */
-
 function mergeData(csv, dbData) {
 
   let result = [];
@@ -297,7 +310,9 @@ function isWeekend(text) {
 
   let date = new Date(2026, m, d);
 
-  return date.getDay() === 0 || date.getDay() === 6;
+  let day = date.getDay();
+
+  return day === 0 || day === 6;
 
 }
 
@@ -357,14 +372,26 @@ function draw() {
   }
 
 
-  /* ===== HEADER DATE ===== */
+  let counts = new Array(data[0].length).fill(0);
+
+  for (let r = 2; r < data.length; r++) {
+
+    for (let c = 1; c < data[0].length; c++) {
+
+      if (data[r][c] === "ja") counts[c]++;
+
+    }
+
+  }
+
+
+  /* HEADER */
 
   let trHead = document.createElement("tr");
 
   visibleCols.forEach(c => {
 
     let th = document.createElement("th");
-
     let val = data[0][c] || "";
 
     th.textContent = val;
@@ -383,7 +410,7 @@ function draw() {
   t.appendChild(trHead);
 
 
-  /* ===== TYPE ===== */
+  /* TYPE */
 
   let trType = document.createElement("tr");
 
@@ -393,14 +420,14 @@ function draw() {
 
     let val = data[1]?.[c] || "";
 
-    td.textContent = val;
-
-    if (val === "Spiel") td.style.fontWeight = "bold";
+    td.innerHTML = val;
 
     if (c === 0) td.className = "name";
 
     td.style.fontSize = "12px";
     td.style.color = "#555";
+
+    if (val === "Spiel") td.style.fontWeight = "bold";
 
     trType.appendChild(td);
 
@@ -409,15 +436,7 @@ function draw() {
   t.appendChild(trType);
 
 
-  /* ===== TOTAL ===== */
-
-  let counts = new Array(data[0].length).fill(0);
-
-  for (let r = 2; r < data.length; r++) {
-    for (let c = 1; c < data[0].length; c++) {
-      if (data[r][c] === "ja") counts[c]++;
-    }
-  }
+  /* TOTAL */
 
   let trTotal = document.createElement("tr");
 
@@ -440,7 +459,7 @@ function draw() {
   t.appendChild(trTotal);
 
 
-  /* ===== PLAYERS ===== */
+  /* PLAYERS */
 
   for (let r = 2; r < data.length; r++) {
 
@@ -449,7 +468,6 @@ function draw() {
     visibleCols.forEach(c => {
 
       let td = document.createElement("td");
-
       let val = data[r][c] || "";
 
       if (c === 0) {
@@ -508,7 +526,7 @@ function draw() {
 }
 
 
-/* ================= LOAD ================= */
+/* LOAD */
 
 async function load() {
 
@@ -534,19 +552,16 @@ async function load() {
 }
 
 
-/* ================= SAVE ================= */
+/* SAVE */
 
 async function save() {
 
   await db.collection("training").doc("list").set({
-
     json: JSON.stringify(data),
     comments: comments
-
   });
 
 }
-
 
 load();
 
