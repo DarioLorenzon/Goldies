@@ -13,46 +13,29 @@
 
 <style>
 
-/* =====================================
-   GENERAL
-===================================== */
-
 body {
   margin: 0;
   font-family: Arial;
   font-size: 14px;
 }
 
-/* =====================================
-   LAYOUT
-===================================== */
-
 .scroll-x {
   overflow: auto;
   width: 100%;
 }
-
-/* =====================================
-   TABLE
-===================================== */
 
 table {
   border-collapse: collapse;
   width: max-content;
 }
 
-td,
-th {
+td, th {
   border: 1px solid #999;
   padding: 6px;
   min-width: 40px;
   text-align: center;
   background: white;
 }
-
-/* =====================================
-   NAME COLUMN
-===================================== */
 
 .name {
   position: sticky;
@@ -69,18 +52,10 @@ th:first-child {
   background: white;
 }
 
-/* =====================================
-   TOTAL ROW
-===================================== */
-
 .count {
   background: #f5f5f5;
   font-size: 12px;
 }
-
-/* =====================================
-   WEEKEND / TODAY
-===================================== */
 
 .weekend {
   background: #f2e9ff;
@@ -89,10 +64,6 @@ th:first-child {
 .today {
   background: #dbeeff;
 }
-
-/* =====================================
-   DOTS
-===================================== */
 
 .dot {
   width: 14px;
@@ -105,10 +76,6 @@ th:first-child {
 .dot-ev { background:#ffd84d; }
 .dot-nein { background:#ff5a5a; }
 
-/* =====================================
-   TAP
-===================================== */
-
 .tap {
   animation: tapAnim 0.15s ease;
 }
@@ -118,10 +85,6 @@ th:first-child {
   50% { transform: scale(1.1); }
   100% { transform: scale(1); }
 }
-
-/* =====================================
-   COMMENT POPUP
-===================================== */
 
 #commentBox {
   position: fixed;
@@ -176,56 +139,36 @@ let comments = {};
 let currentCommentDate = null;
 
 let initialized = false;
-
 let saveTimer = null;
 
 function autoSave() {
-
   if (!initialized) return;
-
   clearTimeout(saveTimer);
-
   saveTimer = setTimeout(save, 500);
-
 }
 
+/* COMMENT */
 
-/* ================= COMMENT ================= */
-
-function openComment(date){
-
+function openComment(date) {
   currentCommentDate = date;
-
-  document.getElementById("commentTitle").innerText =
-    "Kommentar " + date;
-
-  document.getElementById("commentText").value =
-    comments[date] || "";
-
-  document.getElementById("commentBox").style.display="block";
-
+  document.getElementById("commentTitle").innerText = "Kommentar " + date;
+  document.getElementById("commentText").value = comments[date] || "";
+  document.getElementById("commentBox").style.display = "block";
 }
 
-function closeComment(){
-
-  document.getElementById("commentBox").style.display="none";
-
+function closeComment() {
+  document.getElementById("commentBox").style.display = "none";
 }
 
-function saveComment(){
-
+function saveComment() {
   comments[currentCommentDate] =
     document.getElementById("commentText").value;
-
   closeComment();
-
   save();
   draw();
-
 }
 
-
-/* ================= CSV ================= */
+/* CSV */
 
 function loadCSV() {
 
@@ -267,6 +210,7 @@ function loadCSV() {
 
 }
 
+/* MERGE */
 
 function mergeData(csv, dbData) {
 
@@ -297,8 +241,7 @@ function mergeData(csv, dbData) {
 
 }
 
-
-/* ================= DATE ================= */
+/* DATE */
 
 function isWeekend(text) {
 
@@ -310,9 +253,7 @@ function isWeekend(text) {
 
   let date = new Date(2026, m, d);
 
-  let day = date.getDay();
-
-  return day === 0 || day === 6;
+  return date.getDay() === 0 || date.getDay() === 6;
 
 }
 
@@ -352,57 +293,37 @@ function isFutureOrToday(text) {
 
 }
 
-
-/* ================= DRAW ================= */
+/* DRAW */
 
 function draw() {
 
   let t = document.getElementById("t");
-
   t.innerHTML = "";
 
   if (!data.length) return;
 
-
   let visibleCols = [];
 
   for (let c = 0; c < data[0].length; c++) {
-
-    if (c === 0) {
-      visibleCols.push(c);
-      continue;
-    }
-
-    if (isFutureOrToday(data[0][c])) {
-      visibleCols.push(c);
-    }
-
+    if (c === 0) visibleCols.push(c);
+    else if (isFutureOrToday(data[0][c])) visibleCols.push(c);
   }
-
 
   let counts = new Array(data[0].length).fill(0);
 
   for (let r = 2; r < data.length; r++) {
-
     for (let c = 1; c < data[0].length; c++) {
-
-      if (data[r][c] === "ja") {
-        counts[c]++;
-      }
-
+      if (data[r][c] === "ja") counts[c]++;
     }
-
   }
 
-
-  /* ================= HEADER DATE ================= */
+  // HEADER
 
   let trHead = document.createElement("tr");
 
   visibleCols.forEach(c => {
 
     let th = document.createElement("th");
-
     let val = data[0][c] || "";
 
     th.textContent = val;
@@ -421,8 +342,7 @@ function draw() {
   t.appendChild(trHead);
 
 
-
-  /* ================= TYPE ================= */
+  // TYPE
 
   let trType = document.createElement("tr");
 
@@ -432,14 +352,14 @@ function draw() {
 
     let val = data[1]?.[c] || "";
 
-    td.innerHTML = val;
+    td.textContent = val;
+
+    if (val === "Spiel") td.style.fontWeight = "bold";
 
     if (c === 0) td.className = "name";
 
     td.style.fontSize = "12px";
     td.style.color = "#555";
-
-    if (val === "Spiel") td.style.fontWeight = "bold";
 
     trType.appendChild(td);
 
@@ -448,8 +368,7 @@ function draw() {
   t.appendChild(trType);
 
 
-
-  /* ================= TOTAL ================= */
+  // TOTAL
 
   let trTotal = document.createElement("tr");
 
@@ -472,8 +391,7 @@ function draw() {
   t.appendChild(trTotal);
 
 
-
-  /* ================= PLAYERS ================= */
+  // PLAYERS
 
   for (let r = 2; r < data.length; r++) {
 
@@ -496,9 +414,7 @@ function draw() {
 
           td.classList.add("tap");
 
-          setTimeout(() => {
-            td.classList.remove("tap");
-          },150);
+          setTimeout(() => td.classList.remove("tap"), 150);
 
           let order = ["","ja","ev","nein"];
 
@@ -539,8 +455,7 @@ function draw() {
   }
 
 
-
-  /* ================= BOTTOM DATE ================= */
+  // BOTTOM DATE
 
   let trBottom = document.createElement("tr");
 
@@ -562,8 +477,7 @@ function draw() {
   t.appendChild(trBottom);
 
 
-
-  /* ================= BOTTOM TYPE ================= */
+  // BOTTOM TYPE
 
   let trTypeBottom = document.createElement("tr");
 
@@ -575,12 +489,12 @@ function draw() {
 
     td.textContent = val;
 
+    if (val === "Spiel") td.style.fontWeight = "bold";
+
     if (c === 0) td.className = "name";
 
     td.style.fontSize = "12px";
     td.style.color = "#555";
-
-    if (val === "Spiel") td.style.fontWeight = "bold";
 
     trTypeBottom.appendChild(td);
 
@@ -589,148 +503,6 @@ function draw() {
   t.appendChild(trTypeBottom);
 
 }
-
-
-  /* HEADER */
-
-  let trHead = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let th = document.createElement("th");
-    let val = data[0][c] || "";
-
-    th.textContent = val;
-
-    if (comments[val]) th.innerHTML += " 💬";
-
-    th.onclick = () => openComment(val);
-
-    if (isWeekend(val)) th.classList.add("weekend");
-    if (isToday(val)) th.classList.add("today");
-
-    trHead.appendChild(th);
-
-  });
-
-  t.appendChild(trHead);
-
-
-  /* TYPE */
-
-  let trType = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let td = document.createElement("td");
-
-    let val = data[1]?.[c] || "";
-
-    td.innerHTML = val;
-
-    if (c === 0) td.className = "name";
-
-    td.style.fontSize = "12px";
-    td.style.color = "#555";
-
-    if (val === "Spiel") td.style.fontWeight = "bold";
-
-    trType.appendChild(td);
-
-  });
-
-  t.appendChild(trType);
-
-
-  /* TOTAL */
-
-  let trTotal = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let td = document.createElement("td");
-
-    if (c === 0) {
-      td.textContent = "Total";
-      td.className = "name";
-    } else {
-      td.textContent = counts[c];
-      td.className = "count";
-    }
-
-    trTotal.appendChild(td);
-
-  });
-
-  t.appendChild(trTotal);
-
-
-  /* PLAYERS */
-
-  for (let r = 2; r < data.length; r++) {
-
-    let tr = document.createElement("tr");
-
-    visibleCols.forEach(c => {
-
-      let td = document.createElement("td");
-      let val = data[r][c] || "";
-
-      if (c === 0) {
-
-        td.textContent = val;
-        td.className = "name";
-
-      } else {
-
-        td.onclick = () => {
-
-          td.classList.add("tap");
-
-          setTimeout(() => {
-            td.classList.remove("tap");
-          },150);
-
-          let order = ["","ja","ev","nein"];
-
-          let i = order.indexOf(data[r][c]);
-
-          i++;
-          if (i >= order.length) i = 0;
-
-          data[r][c] = order[i];
-
-          draw();
-          autoSave();
-
-        };
-
-        if (val) {
-
-          let dot = document.createElement("div");
-
-          dot.className = "dot";
-
-          if (val==="ja") dot.classList.add("dot-ja");
-          if (val==="ev") dot.classList.add("dot-ev");
-          if (val==="nein") dot.classList.add("dot-nein");
-
-          td.appendChild(dot);
-
-        }
-
-      }
-
-      tr.appendChild(td);
-
-    });
-
-    t.appendChild(tr);
-
-  }
-
-
-
 
 /* LOAD */
 
@@ -743,10 +515,8 @@ async function load() {
   let dbData = null;
 
   if (doc.exists) {
-
     dbData = JSON.parse(doc.data().json);
     comments = doc.data().comments || {};
-
   }
 
   data = mergeData(csv, dbData);
@@ -756,7 +526,6 @@ async function load() {
   draw();
 
 }
-
 
 /* SAVE */
 
