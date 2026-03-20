@@ -11,10 +11,11 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-
 <style>
 
-/* ===== GENERAL ===== */
+/* =====================================
+   GENERAL
+===================================== */
 
 body {
   margin: 0;
@@ -22,28 +23,39 @@ body {
   font-size: 14px;
 }
 
+
+/* =====================================
+   LAYOUT
+===================================== */
+
 .scroll-x {
   overflow: auto;
   width: 100%;
 }
 
-/* ===== TABLE ===== */
+
+/* =====================================
+   TABLE
+===================================== */
 
 table {
   border-collapse: collapse;
   width: max-content;
 }
 
-td, th {
+td,
+th {
   border: 1px solid #999;
   padding: 6px;
   min-width: 40px;
-  height: 34px;
   text-align: center;
   background: white;
 }
 
-/* ===== NAME ===== */
+
+/* =====================================
+   NAME COLUMN
+===================================== */
 
 .name {
   position: sticky;
@@ -54,41 +66,82 @@ td, th {
   padding-left: 4px;
 }
 
-/* ===== TOTAL ===== */
+th:first-child {
+  position: sticky;
+  left: 0;
+  background: white;
+}
+
+
+/* =====================================
+   TOTAL ROW
+===================================== */
 
 .count {
   background: #f5f5f5;
   font-size: 12px;
 }
 
-/* ===== MARKERS ===== */
+
+/* =====================================
+   WEEKEND / TODAY
+===================================== */
 
 .weekend {
-  background: #f3f0f7;
+  background: #f2e9ff;
 }
 
 .today {
   background: #dbeeff;
 }
 
-/* ===== DOTS ===== */
+
+/* =====================================
+   DOTS (ja / ev / nein)
+===================================== */
 
 .dot {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   margin: auto;
 }
 
-.dot-ja { background:#3ccf5a; }
-.dot-ev { background:#ffd84d; }
-.dot-nein { background:#ff5a5a; }
+.dot-ja {
+  background: #3ccf5a;
+}
 
-/* ===== COMMENT ===== */
+.dot-ev {
+  background: #ffd84d;
+}
 
-.comment {
-  font-size: 10px;
-  margin-left: 2px;
+.dot-nein {
+  background: #ff5a5a;
+}
+
+
+/* =====================================
+   TAP ANIMATION
+===================================== */
+
+.tap {
+  animation: tapAnim 0.15s ease;
+}
+
+@keyframes tapAnim {
+
+  0% {
+    transform: scale(0.9);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+
 }
 
 </style>
@@ -100,7 +153,6 @@ td, th {
 <div class="scroll-x">
 <table id="t"></table>
 </div>
-
 
 <script>
 
@@ -114,14 +166,11 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
-
 let data = [];
 let comments = {};
-
 let initialized = false;
 
 let saveTimer = null;
-
 
 function autoSave() {
 
@@ -134,8 +183,6 @@ function autoSave() {
 }
 
 
-
-/* ===== CSV ===== */
 
 function loadCSV() {
 
@@ -179,8 +226,6 @@ function loadCSV() {
 
 
 
-/* ===== MERGE ===== */
-
 function mergeData(csv, dbData) {
 
   let result = [];
@@ -212,8 +257,6 @@ function mergeData(csv, dbData) {
 
 
 
-/* ===== DATE ===== */
-
 function isWeekend(text) {
 
   let p = text.split(".");
@@ -224,9 +267,12 @@ function isWeekend(text) {
 
   let date = new Date(2026, m, d);
 
-  return date.getDay() === 0 || date.getDay() === 6;
+  let day = date.getDay();
+
+  return day === 0 || day === 6;
 
 }
+
 
 
 function isToday(text) {
@@ -249,6 +295,7 @@ function isToday(text) {
 }
 
 
+
 function isFutureOrToday(text) {
 
   let p = text.split(".");
@@ -267,8 +314,6 @@ function isFutureOrToday(text) {
 }
 
 
-
-/* ===== DRAW ===== */
 
 function draw() {
 
@@ -295,7 +340,20 @@ function draw() {
   }
 
 
-  /* ===== HEADER ===== */
+  let counts = new Array(data[0].length).fill(0);
+
+  for (let r = 2; r < data.length; r++) {
+
+    for (let c = 1; c < data[0].length; c++) {
+
+      if (data[r][c] === "ja") {
+        counts[c]++;
+      }
+
+    }
+
+  }
+
 
   let trHead = document.createElement("tr");
 
@@ -307,25 +365,25 @@ function draw() {
 
     th.textContent = val;
 
-    if (comments[val]) {
-      th.innerHTML += " 💬";
-    }
+if (comments[val]) {
+  th.innerHTML += " 💬";
+}
 
-    th.onclick = () => {
+th.onclick = () => {
 
-      let txt = prompt(
-        "Kommentar für " + val,
-        comments[val] || ""
-      );
+  let txt = prompt(
+    "Kommentar für " + val,
+    comments[val] || ""
+  );
 
-      if (txt === null) return;
+  if (txt === null) return;
 
-      comments[val] = txt;
+  comments[val] = txt;
 
-      save();
-      draw();
+  save();
+  draw();
 
-    };
+};
 
     if (isWeekend(val)) th.classList.add("weekend");
     if (isToday(val)) th.classList.add("today");
@@ -338,8 +396,6 @@ function draw() {
 
 
 
-  /* ===== TYPE ===== */
-
   let trType = document.createElement("tr");
 
   visibleCols.forEach(c => {
@@ -348,13 +404,16 @@ function draw() {
 
     let val = data[1]?.[c] || "";
 
-    td.textContent = val;
-
-    if (val === "Spiel") {
-      td.style.fontWeight = "bold";
-    }
+    td.innerHTML = val;
 
     if (c === 0) td.className = "name";
+
+    td.style.fontSize = "12px";
+    td.style.color = "#555";
+
+    if (val === "Spiel") {
+    td.style.fontWeight = "bold";
+    }
 
     trType.appendChild(td);
 
@@ -364,7 +423,27 @@ function draw() {
 
 
 
-  /* ===== ROWS ===== */
+  let trTotal = document.createElement("tr");
+
+  visibleCols.forEach(c => {
+
+    let td = document.createElement("td");
+
+    if (c === 0) {
+      td.textContent = "Total";
+      td.className = "name";
+    } else {
+      td.textContent = counts[c];
+      td.className = "count";
+    }
+
+    trTotal.appendChild(td);
+
+  });
+
+  t.appendChild(trTotal);
+
+
 
   for (let r = 2; r < data.length; r++) {
 
@@ -383,36 +462,45 @@ function draw() {
 
       } else {
 
+        td.textContent = "";
+
         td.onclick = () => {
 
-          let order = ["", "ja", "ev", "nein"];
+        td.classList.add("tap");
+      
+        setTimeout(() => {
+          td.classList.remove("tap");
+        }, 150);
+      
+      
+        let order = ["", "ja", "ev", "nein"];
+      
+        let i = order.indexOf(data[r][c]);
+      
+        i++;
+      
+        if (i >= order.length) i = 0;
+      
+        data[r][c] = order[i];
+      
+        draw();
+        autoSave();
+      
+      };
 
-          let i = order.indexOf(data[r][c]);
+      if (val) {
 
-          i++;
+      let dot = document.createElement("div");
+    
+      dot.className = "dot";
+    
+      if (val === "ja") dot.classList.add("dot-ja");
+      if (val === "ev") dot.classList.add("dot-ev");
+      if (val === "nein") dot.classList.add("dot-nein");
+    
+      td.appendChild(dot);
 
-          if (i >= order.length) i = 0;
-
-          data[r][c] = order[i];
-
-          draw();
-          autoSave();
-
-        };
-
-        if (val) {
-
-          let dot = document.createElement("div");
-
-          dot.className = "dot";
-
-          if (val === "ja") dot.classList.add("dot-ja");
-          if (val === "ev") dot.classList.add("dot-ev");
-          if (val === "nein") dot.classList.add("dot-nein");
-
-          td.appendChild(dot);
-
-        }
+}
 
       }
 
@@ -424,11 +512,57 @@ function draw() {
 
   }
 
+
+
+  let trBottom = document.createElement("tr");
+
+  visibleCols.forEach(c => {
+
+    let th = document.createElement("th");
+
+    let val = data[0][c] || "";
+
+    th.textContent = val;
+
+    if (isWeekend(val)) th.classList.add("weekend");
+    if (isToday(val)) th.classList.add("today");
+
+    trBottom.appendChild(th);
+
+  });
+
+  t.appendChild(trBottom);
+
+
+
+  let trTypeBottom = document.createElement("tr");
+
+  visibleCols.forEach(c => {
+
+    let td = document.createElement("td");
+
+    let val = data[1]?.[c] || "";
+
+    td.textContent = val;
+
+    if (c === 0) td.className = "name";
+
+    td.style.fontSize = "12px";
+    td.style.color = "#555";
+
+    if (val === "Spiel") {
+    td.style.fontWeight = "bold";
+  }
+
+    trTypeBottom.appendChild(td);
+
+  });
+
+  t.appendChild(trTypeBottom);
+
 }
 
 
-
-/* ===== LOAD ===== */
 
 async function load() {
 
@@ -441,16 +575,15 @@ async function load() {
     let doc = await db.collection("training").doc("list").get();
 
     if (doc.exists) {
-
-      dbData = doc.data();
-
+      dbData = JSON.parse(doc.data().json);
+      comments = doc.data().comments || {};
     }
 
   } catch (e) {}
 
-  data = mergeData(csv, dbData?.json);
+  data = mergeData(csv, dbData);
 
-  comments = dbData?.comments || {};
+  await save();
 
   initialized = true;
 
@@ -460,15 +593,11 @@ async function load() {
 
 
 
-/* ===== SAVE ===== */
-
 async function save() {
 
   await db.collection("training").doc("list").set({
-
-    json: data,
+    json: JSON.stringify(data),
     comments: comments
-
   });
 
 }
