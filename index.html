@@ -13,9 +13,7 @@
 
 <style>
 
-/* =====================================
-   GENERAL
-===================================== */
+/* GENERAL */
 
 body {
   margin: 0;
@@ -23,28 +21,19 @@ body {
   font-size: 14px;
 }
 
-
-/* =====================================
-   LAYOUT
-===================================== */
-
 .scroll-x {
   overflow: auto;
   width: 100%;
 }
 
-
-/* =====================================
-   TABLE
-===================================== */
+/* TABLE */
 
 table {
   border-collapse: collapse;
   width: max-content;
 }
 
-td,
-th {
+td, th {
   border: 1px solid #999;
   padding: 6px;
   min-width: 40px;
@@ -52,10 +41,7 @@ th {
   background: white;
 }
 
-
-/* =====================================
-   NAME COLUMN
-===================================== */
+/* NAME */
 
 .name {
   position: sticky;
@@ -66,26 +52,14 @@ th {
   padding-left: 4px;
 }
 
-th:first-child {
-  position: sticky;
-  left: 0;
-  background: white;
-}
-
-
-/* =====================================
-   TOTAL ROW
-===================================== */
+/* TOTAL */
 
 .count {
   background: #f5f5f5;
   font-size: 12px;
 }
 
-
-/* =====================================
-   WEEKEND / TODAY
-===================================== */
+/* MARK */
 
 .weekend {
   background: #f2e9ff;
@@ -95,10 +69,7 @@ th:first-child {
   background: #dbeeff;
 }
 
-
-/* =====================================
-   DOTS (ja / ev / nein)
-===================================== */
+/* DOT */
 
 .dot {
   width: 14px;
@@ -107,22 +78,11 @@ th:first-child {
   margin: auto;
 }
 
-.dot-ja {
-  background: #3ccf5a;
-}
+.dot-ja { background:#3ccf5a; }
+.dot-ev { background:#ffd84d; }
+.dot-nein { background:#ff5a5a; }
 
-.dot-ev {
-  background: #ffd84d;
-}
-
-.dot-nein {
-  background: #ff5a5a;
-}
-
-
-/* =====================================
-   TAP ANIMATION
-===================================== */
+/* TAP */
 
 .tap {
   animation: tapAnim 0.15s ease;
@@ -130,18 +90,24 @@ th:first-child {
 
 @keyframes tapAnim {
 
-  0% {
-    transform: scale(0.9);
-  }
+  0% { transform: scale(0.9); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 
-  50% {
-    transform: scale(1.1);
-  }
+}
 
-  100% {
-    transform: scale(1);
-  }
+/* COMMENT POPUP */
 
+#commentBox {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border: 1px solid #999;
+  padding: 10px;
+  display: none;
+  z-index: 1000;
 }
 
 </style>
@@ -153,6 +119,22 @@ th:first-child {
 <div class="scroll-x">
 <table id="t"></table>
 </div>
+
+
+<div id="commentBox">
+
+<div id="commentTitle"></div>
+
+<textarea id="commentText"
+style="width:250px;height:100px;"></textarea>
+
+<br><br>
+
+<button onclick="saveComment()">Speichern</button>
+<button onclick="closeComment()">Abbrechen</button>
+
+</div>
+
 
 <script>
 
@@ -168,9 +150,13 @@ const db = firebase.firestore();
 
 let data = [];
 let comments = {};
+
+let currentCommentDate = null;
+
 let initialized = false;
 
 let saveTimer = null;
+
 
 function autoSave() {
 
@@ -183,6 +169,44 @@ function autoSave() {
 }
 
 
+/* COMMENT */
+
+function openComment(date) {
+
+  currentCommentDate = date;
+
+  document.getElementById("commentTitle").innerText =
+    "Kommentar " + date;
+
+  document.getElementById("commentText").value =
+    comments[date] || "";
+
+  document.getElementById("commentBox").style.display = "block";
+
+}
+
+function closeComment() {
+
+  document.getElementById("commentBox").style.display = "none";
+
+}
+
+function saveComment() {
+
+  let txt =
+    document.getElementById("commentText").value;
+
+  comments[currentCommentDate] = txt;
+
+  closeComment();
+
+  save();
+  draw();
+
+}
+
+
+/* CSV */
 
 function loadCSV() {
 
@@ -225,6 +249,7 @@ function loadCSV() {
 }
 
 
+/* MERGE */
 
 function mergeData(csv, dbData) {
 
@@ -256,6 +281,7 @@ function mergeData(csv, dbData) {
 }
 
 
+/* DATE */
 
 function isWeekend(text) {
 
@@ -272,8 +298,6 @@ function isWeekend(text) {
   return day === 0 || day === 6;
 
 }
-
-
 
 function isToday(text) {
 
@@ -294,8 +318,6 @@ function isToday(text) {
 
 }
 
-
-
 function isFutureOrToday(text) {
 
   let p = text.split(".");
@@ -314,6 +336,7 @@ function isFutureOrToday(text) {
 }
 
 
+/* DRAW */
 
 function draw() {
 
@@ -340,21 +363,6 @@ function draw() {
   }
 
 
-  let counts = new Array(data[0].length).fill(0);
-
-  for (let r = 2; r < data.length; r++) {
-
-    for (let c = 1; c < data[0].length; c++) {
-
-      if (data[r][c] === "ja") {
-        counts[c]++;
-      }
-
-    }
-
-  }
-
-
   let trHead = document.createElement("tr");
 
   visibleCols.forEach(c => {
@@ -365,24 +373,9 @@ function draw() {
 
     th.textContent = val;
 
-if (comments[val]) {
-  th.innerHTML += " 💬";
-}
+    if (comments[val]) th.innerHTML += " 💬";
 
-th.onclick = () => {
-
-  openComment(val);
-
-};
-
-  if (txt === null) return;
-
-  comments[val] = txt;
-
-  save();
-  draw();
-
-};
+    th.onclick = () => openComment(val);
 
     if (isWeekend(val)) th.classList.add("weekend");
     if (isToday(val)) th.classList.add("today");
@@ -392,56 +385,6 @@ th.onclick = () => {
   });
 
   t.appendChild(trHead);
-
-
-
-  let trType = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let td = document.createElement("td");
-
-    let val = data[1]?.[c] || "";
-
-    td.innerHTML = val;
-
-    if (c === 0) td.className = "name";
-
-    td.style.fontSize = "12px";
-    td.style.color = "#555";
-
-    if (val === "Spiel") {
-    td.style.fontWeight = "bold";
-    }
-
-    trType.appendChild(td);
-
-  });
-
-  t.appendChild(trType);
-
-
-
-  let trTotal = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let td = document.createElement("td");
-
-    if (c === 0) {
-      td.textContent = "Total";
-      td.className = "name";
-    } else {
-      td.textContent = counts[c];
-      td.className = "count";
-    }
-
-    trTotal.appendChild(td);
-
-  });
-
-  t.appendChild(trTotal);
-
 
 
   for (let r = 2; r < data.length; r++) {
@@ -461,45 +404,41 @@ th.onclick = () => {
 
       } else {
 
-        td.textContent = "";
-
         td.onclick = () => {
 
-        td.classList.add("tap");
-      
-        setTimeout(() => {
-          td.classList.remove("tap");
-        }, 150);
-      
-      
-        let order = ["", "ja", "ev", "nein"];
-      
-        let i = order.indexOf(data[r][c]);
-      
-        i++;
-      
-        if (i >= order.length) i = 0;
-      
-        data[r][c] = order[i];
-      
-        draw();
-        autoSave();
-      
-      };
+          td.classList.add("tap");
 
-      if (val) {
+          setTimeout(() => {
+            td.classList.remove("tap");
+          },150);
 
-      let dot = document.createElement("div");
-    
-      dot.className = "dot";
-    
-      if (val === "ja") dot.classList.add("dot-ja");
-      if (val === "ev") dot.classList.add("dot-ev");
-      if (val === "nein") dot.classList.add("dot-nein");
-    
-      td.appendChild(dot);
+          let order = ["","ja","ev","nein"];
 
-}
+          let i = order.indexOf(data[r][c]);
+
+          i++;
+          if (i >= order.length) i = 0;
+
+          data[r][c] = order[i];
+
+          draw();
+          autoSave();
+
+        };
+
+        if (val) {
+
+          let dot = document.createElement("div");
+
+          dot.className = "dot";
+
+          if (val==="ja") dot.classList.add("dot-ja");
+          if (val==="ev") dot.classList.add("dot-ev");
+          if (val==="nein") dot.classList.add("dot-nein");
+
+          td.appendChild(dot);
+
+        }
 
       }
 
@@ -511,78 +450,27 @@ th.onclick = () => {
 
   }
 
-
-
-  let trBottom = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let th = document.createElement("th");
-
-    let val = data[0][c] || "";
-
-    th.textContent = val;
-
-    if (isWeekend(val)) th.classList.add("weekend");
-    if (isToday(val)) th.classList.add("today");
-
-    trBottom.appendChild(th);
-
-  });
-
-  t.appendChild(trBottom);
-
-
-
-  let trTypeBottom = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let td = document.createElement("td");
-
-    let val = data[1]?.[c] || "";
-
-    td.textContent = val;
-
-    if (c === 0) td.className = "name";
-
-    td.style.fontSize = "12px";
-    td.style.color = "#555";
-
-    if (val === "Spiel") {
-    td.style.fontWeight = "bold";
-  }
-
-    trTypeBottom.appendChild(td);
-
-  });
-
-  t.appendChild(trTypeBottom);
-
 }
 
 
+/* LOAD */
 
 async function load() {
 
   let csv = await loadCSV();
 
+  let doc = await db.collection("training").doc("list").get();
+
   let dbData = null;
 
-  try {
+  if (doc.exists) {
 
-    let doc = await db.collection("training").doc("list").get();
+    dbData = JSON.parse(doc.data().json);
+    comments = doc.data().comments || {};
 
-    if (doc.exists) {
-      dbData = JSON.parse(doc.data().json);
-      comments = doc.data().comments || {};
-    }
-
-  } catch (e) {}
+  }
 
   data = mergeData(csv, dbData);
-
-  await save();
 
   initialized = true;
 
@@ -591,50 +479,16 @@ async function load() {
 }
 
 
+/* SAVE */
 
 async function save() {
 
   await db.collection("training").doc("list").set({
+
     json: JSON.stringify(data),
     comments: comments
+
   });
-
-}
-
-
-let currentCommentDate = null;
-
-function openComment(date) {
-
-  currentCommentDate = date;
-
-  document.getElementById("commentTitle").innerText =
-    "Kommentar " + date;
-
-  document.getElementById("commentText").value =
-    comments[date] || "";
-
-  document.getElementById("commentBox").style.display = "block";
-
-}
-
-function closeComment() {
-
-  document.getElementById("commentBox").style.display = "none";
-
-}
-
-function saveComment() {
-
-  let txt =
-    document.getElementById("commentText").value;
-
-  comments[currentCommentDate] = txt;
-
-  closeComment();
-
-  save();
-  draw();
 
 }
 
@@ -642,31 +496,6 @@ function saveComment() {
 load();
 
 </script>
-
-<div id="commentBox" style="
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:white;
-border:1px solid #999;
-padding:10px;
-display:none;
-z-index:1000;
-">
-
-<div id="commentTitle"></div>
-
-<textarea id="commentText"
-style="width:250px;height:100px;"></textarea>
-
-<br><br>
-
-<button onclick="saveComment()">Speichern</button>
-<button onclick="closeComment()">Abbrechen</button>
-
-</div>
-
 
 </body>
 </html>
