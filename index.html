@@ -13,7 +13,7 @@
 
 <style>
 
-/* GENERAL */
+/* ===== GENERAL ===== */
 
 body {
   margin: 0;
@@ -26,7 +26,7 @@ body {
   width: 100%;
 }
 
-/* TABLE */
+/* ===== TABLE ===== */
 
 table {
   border-collapse: collapse;
@@ -41,7 +41,7 @@ td, th {
   background: white;
 }
 
-/* NAME */
+/* ===== NAME ===== */
 
 .name {
   position: sticky;
@@ -52,14 +52,14 @@ td, th {
   padding-left: 4px;
 }
 
-/* TOTAL */
+/* ===== TOTAL ===== */
 
 .count {
   background: #f5f5f5;
   font-size: 12px;
 }
 
-/* MARK */
+/* ===== MARK ===== */
 
 .weekend {
   background: #f2e9ff;
@@ -69,7 +69,7 @@ td, th {
   background: #dbeeff;
 }
 
-/* DOT */
+/* ===== DOT ===== */
 
 .dot {
   width: 14px;
@@ -82,21 +82,19 @@ td, th {
 .dot-ev { background:#ffd84d; }
 .dot-nein { background:#ff5a5a; }
 
-/* TAP */
+/* ===== TAP ===== */
 
 .tap {
   animation: tapAnim 0.15s ease;
 }
 
 @keyframes tapAnim {
-
   0% { transform: scale(0.9); }
   50% { transform: scale(1.1); }
   100% { transform: scale(1); }
-
 }
 
-/* COMMENT POPUP */
+/* ===== COMMENT POPUP ===== */
 
 #commentBox {
   position: fixed;
@@ -138,6 +136,8 @@ style="width:250px;height:100px;"></textarea>
 
 <script>
 
+/* ================= FIREBASE ================= */
+
 const firebaseConfig = {
   apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
   authDomain: "goldies-89ea2.firebaseapp.com",
@@ -148,15 +148,19 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
+
+/* ================= GLOBAL ================= */
+
 let data = [];
 let comments = {};
 
 let currentCommentDate = null;
 
 let initialized = false;
-
 let saveTimer = null;
 
+
+/* ================= AUTOSAVE ================= */
 
 function autoSave() {
 
@@ -169,7 +173,7 @@ function autoSave() {
 }
 
 
-/* COMMENT */
+/* ================= COMMENT ================= */
 
 function openComment(date) {
 
@@ -206,7 +210,7 @@ function saveComment() {
 }
 
 
-/* CSV */
+/* ================= CSV ================= */
 
 function loadCSV() {
 
@@ -249,7 +253,7 @@ function loadCSV() {
 }
 
 
-/* MERGE */
+/* ================= MERGE ================= */
 
 function mergeData(csv, dbData) {
 
@@ -281,7 +285,7 @@ function mergeData(csv, dbData) {
 }
 
 
-/* DATE */
+/* ================= DATE ================= */
 
 function isWeekend(text) {
 
@@ -293,9 +297,7 @@ function isWeekend(text) {
 
   let date = new Date(2026, m, d);
 
-  let day = date.getDay();
-
-  return day === 0 || day === 6;
+  return date.getDay() === 0 || date.getDay() === 6;
 
 }
 
@@ -336,34 +338,26 @@ function isFutureOrToday(text) {
 }
 
 
-/* DRAW */
+/* ================= DRAW ================= */
 
-  function draw() {
+function draw() {
 
   let t = document.getElementById("t");
-
   t.innerHTML = "";
 
   if (!data.length) return;
-
 
   let visibleCols = [];
 
   for (let c = 0; c < data[0].length; c++) {
 
-    if (c === 0) {
-      visibleCols.push(c);
-      continue;
-    }
-
-    if (isFutureOrToday(data[0][c])) {
-      visibleCols.push(c);
-    }
+    if (c === 0) visibleCols.push(c);
+    else if (isFutureOrToday(data[0][c])) visibleCols.push(c);
 
   }
 
 
-  /* ================= HEADER DATE ================= */
+  /* ===== HEADER DATE ===== */
 
   let trHead = document.createElement("tr");
 
@@ -389,8 +383,7 @@ function isFutureOrToday(text) {
   t.appendChild(trHead);
 
 
-
-  /* ================= TYPE ================= */
+  /* ===== TYPE ===== */
 
   let trType = document.createElement("tr");
 
@@ -402,9 +395,7 @@ function isFutureOrToday(text) {
 
     td.textContent = val;
 
-    if (val === "Spiel") {
-      td.style.fontWeight = "bold";
-    }
+    if (val === "Spiel") td.style.fontWeight = "bold";
 
     if (c === 0) td.className = "name";
 
@@ -418,8 +409,7 @@ function isFutureOrToday(text) {
   t.appendChild(trType);
 
 
-
-  /* ================= TOTAL ================= */
+  /* ===== TOTAL ===== */
 
   let counts = new Array(data[0].length).fill(0);
 
@@ -450,154 +440,7 @@ function isFutureOrToday(text) {
   t.appendChild(trTotal);
 
 
-
-  /* ================= PLAYERS ================= */
-
-  for (let r = 2; r < data.length; r++) {
-
-    let tr = document.createElement("tr");
-
-    visibleCols.forEach(c => {
-
-      let td = document.createElement("td");
-
-      let val = data[r][c] || "";
-
-      if (c === 0) {
-
-        td.textContent = val;
-        td.className = "name";
-
-      } else {
-
-        td.onclick = () => {
-
-          td.classList.add("tap");
-
-          setTimeout(() => {
-            td.classList.remove("tap");
-          }, 150);
-
-          let order = ["", "ja", "ev", "nein"];
-
-          let i = order.indexOf(data[r][c]);
-
-          i++;
-          if (i >= order.length) i = 0;
-
-          data[r][c] = order[i];
-
-          draw();
-          autoSave();
-
-        };
-
-        if (val) {
-
-          let dot = document.createElement("div");
-
-          dot.className = "dot";
-
-          if (val === "ja") dot.classList.add("dot-ja");
-          if (val === "ev") dot.classList.add("dot-ev");
-          if (val === "nein") dot.classList.add("dot-nein");
-
-          td.appendChild(dot);
-
-        }
-
-      }
-
-      tr.appendChild(td);
-
-    });
-
-    t.appendChild(tr);
-
-  }
-
-
-
-  /* ================= BOTTOM DATE ================= */
-
-  let trBottom = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let th = document.createElement("th");
-
-    let val = data[0][c] || "";
-
-    th.textContent = val;
-
-    if (comments[val]) th.innerHTML += " 💬";
-
-    th.onclick = () => openComment(val);
-
-    if (isWeekend(val)) th.classList.add("weekend");
-    if (isToday(val)) th.classList.add("today");
-
-    trBottom.appendChild(th);
-
-  });
-
-  t.appendChild(trBottom);
-
-
-
-  /* ================= BOTTOM TYPE ================= */
-
-  let trTypeBottom = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let td = document.createElement("td");
-
-    let val = data[1]?.[c] || "";
-
-    td.textContent = val;
-
-    if (val === "Spiel") {
-      td.style.fontWeight = "bold";
-    }
-
-    if (c === 0) td.className = "name";
-
-    td.style.fontSize = "12px";
-    td.style.color = "#555";
-
-    trTypeBottom.appendChild(td);
-
-  });
-
-  t.appendChild(trTypeBottom);
-
-}
-
-
-  let trHead = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let th = document.createElement("th");
-
-    let val = data[0][c] || "";
-
-    th.textContent = val;
-
-    if (comments[val]) th.innerHTML += " 💬";
-
-    th.onclick = () => openComment(val);
-
-    if (isWeekend(val)) th.classList.add("weekend");
-    if (isToday(val)) th.classList.add("today");
-
-    trHead.appendChild(th);
-
-  });
-
-  t.appendChild(trHead);
-
+  /* ===== PLAYERS ===== */
 
   for (let r = 2; r < data.length; r++) {
 
@@ -665,7 +508,7 @@ function isFutureOrToday(text) {
 }
 
 
-/* LOAD */
+/* ================= LOAD ================= */
 
 async function load() {
 
@@ -691,7 +534,7 @@ async function load() {
 }
 
 
-/* SAVE */
+/* ================= SAVE ================= */
 
 async function save() {
 
