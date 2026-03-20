@@ -358,16 +358,24 @@ function isFutureOrToday(text) {
 function draw() {
 
   let t = document.getElementById("t");
+
   t.innerHTML = "";
 
   if (!data.length) return;
+
 
   let visibleCols = [];
 
   for (let c = 0; c < data[0].length; c++) {
 
-    if (c === 0) visibleCols.push(c);
-    else if (isFutureOrToday(data[0][c])) visibleCols.push(c);
+    if (c === 0) {
+      visibleCols.push(c);
+      continue;
+    }
+
+    if (isFutureOrToday(data[0][c])) {
+      visibleCols.push(c);
+    }
 
   }
 
@@ -378,11 +386,209 @@ function draw() {
 
     for (let c = 1; c < data[0].length; c++) {
 
-      if (data[r][c] === "ja") counts[c]++;
+      if (data[r][c] === "ja") {
+        counts[c]++;
+      }
 
     }
 
   }
+
+
+  /* ================= HEADER DATE ================= */
+
+  let trHead = document.createElement("tr");
+
+  visibleCols.forEach(c => {
+
+    let th = document.createElement("th");
+
+    let val = data[0][c] || "";
+
+    th.textContent = val;
+
+    if (comments[val]) th.innerHTML += " 💬";
+
+    th.onclick = () => openComment(val);
+
+    if (isWeekend(val)) th.classList.add("weekend");
+    if (isToday(val)) th.classList.add("today");
+
+    trHead.appendChild(th);
+
+  });
+
+  t.appendChild(trHead);
+
+
+
+  /* ================= TYPE ================= */
+
+  let trType = document.createElement("tr");
+
+  visibleCols.forEach(c => {
+
+    let td = document.createElement("td");
+
+    let val = data[1]?.[c] || "";
+
+    td.innerHTML = val;
+
+    if (c === 0) td.className = "name";
+
+    td.style.fontSize = "12px";
+    td.style.color = "#555";
+
+    if (val === "Spiel") td.style.fontWeight = "bold";
+
+    trType.appendChild(td);
+
+  });
+
+  t.appendChild(trType);
+
+
+
+  /* ================= TOTAL ================= */
+
+  let trTotal = document.createElement("tr");
+
+  visibleCols.forEach(c => {
+
+    let td = document.createElement("td");
+
+    if (c === 0) {
+      td.textContent = "Total";
+      td.className = "name";
+    } else {
+      td.textContent = counts[c];
+      td.className = "count";
+    }
+
+    trTotal.appendChild(td);
+
+  });
+
+  t.appendChild(trTotal);
+
+
+
+  /* ================= PLAYERS ================= */
+
+  for (let r = 2; r < data.length; r++) {
+
+    let tr = document.createElement("tr");
+
+    visibleCols.forEach(c => {
+
+      let td = document.createElement("td");
+
+      let val = data[r][c] || "";
+
+      if (c === 0) {
+
+        td.textContent = val;
+        td.className = "name";
+
+      } else {
+
+        td.onclick = () => {
+
+          td.classList.add("tap");
+
+          setTimeout(() => {
+            td.classList.remove("tap");
+          },150);
+
+          let order = ["","ja","ev","nein"];
+
+          let i = order.indexOf(data[r][c]);
+
+          i++;
+          if (i >= order.length) i = 0;
+
+          data[r][c] = order[i];
+
+          draw();
+          autoSave();
+
+        };
+
+        if (val) {
+
+          let dot = document.createElement("div");
+
+          dot.className = "dot";
+
+          if (val==="ja") dot.classList.add("dot-ja");
+          if (val==="ev") dot.classList.add("dot-ev");
+          if (val==="nein") dot.classList.add("dot-nein");
+
+          td.appendChild(dot);
+
+        }
+
+      }
+
+      tr.appendChild(td);
+
+    });
+
+    t.appendChild(tr);
+
+  }
+
+
+
+  /* ================= BOTTOM DATE ================= */
+
+  let trBottom = document.createElement("tr");
+
+  visibleCols.forEach(c => {
+
+    let th = document.createElement("th");
+
+    let val = data[0][c] || "";
+
+    th.textContent = val;
+
+    if (isWeekend(val)) th.classList.add("weekend");
+    if (isToday(val)) th.classList.add("today");
+
+    trBottom.appendChild(th);
+
+  });
+
+  t.appendChild(trBottom);
+
+
+
+  /* ================= BOTTOM TYPE ================= */
+
+  let trTypeBottom = document.createElement("tr");
+
+  visibleCols.forEach(c => {
+
+    let td = document.createElement("td");
+
+    let val = data[1]?.[c] || "";
+
+    td.textContent = val;
+
+    if (c === 0) td.className = "name";
+
+    td.style.fontSize = "12px";
+    td.style.color = "#555";
+
+    if (val === "Spiel") td.style.fontWeight = "bold";
+
+    trTypeBottom.appendChild(td);
+
+  });
+
+  t.appendChild(trTypeBottom);
+
+}
 
 
   /* HEADER */
