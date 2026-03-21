@@ -514,10 +514,17 @@ async function load() {
 
   let dbData = null;
 
-  if (doc.exists) {
-    dbData = JSON.parse(doc.data().json);
-    comments = doc.data().comments || {};
+if (doc.exists) {
+
+  let d = doc.data();
+
+  if (d.json) {
+    dbData = JSON.parse(d.json);
   }
+
+  comments = d.comments || {};
+
+}
 
   data = mergeData(csv, dbData);
 
