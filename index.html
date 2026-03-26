@@ -510,25 +510,52 @@ async function load() {
 
   let csv = await loadCSV();
 
-  let doc = await db.collection("training").doc("list").get();
-
   let dbData = null;
 
-if (doc.exists) {
+  let needSave = false;
 
-  let d = doc.data();
+  try {
 
-  if (d.json) {
-    dbData = JSON.parse(d.json);
+    let doc = await db.collection("training").doc("list").get();
+
+    if (doc.exists) {
+
+      let d = doc.data();
+
+      if (d.json) {
+
+        dbData = JSON.parse(d.json);
+
+      } else {
+
+        needSave = true;
+
+      }
+
+      comments = d.comments || {};
+
+    } else {
+
+      needSave = true;
+
+    }
+
+  } catch (e) {
+
+    console.log("DB load error", e);
+    needSave = true;
+
   }
-
-  comments = d.comments || {};
-
-}
 
   data = mergeData(csv, dbData);
 
   initialized = true;
+
+  if (needSave) {
+
+    await save();
+
+  }
 
   draw();
 
