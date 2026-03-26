@@ -328,9 +328,27 @@ function draw() {
 
     th.textContent = val;
 
-    if (comments[val]) th.innerHTML += " 💬";
+if (comments[val]) {
 
-    th.onclick = () => openComment(val);
+  th.innerHTML += " 💬";
+
+  th.title = comments[val];
+
+  th.onclick = () => {
+
+    if (comments[val]) {
+      alert(comments[val]);
+    } else {
+      openComment(val);
+    }
+
+  };
+
+} else {
+
+  th.onclick = () => openComment(val);
+
+}
 
     if (isWeekend(val)) th.classList.add("weekend");
     if (isToday(val)) th.classList.add("today");
