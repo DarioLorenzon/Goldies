@@ -3,551 +3,1221 @@
 
 <head>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- =====================================
+       META
+  ===================================== -->
 
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <meta charset="UTF-8">
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- Mobile Darstellung -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style>
 
-body {
-  margin: 0;
-  font-family: Arial;
-  font-size: 14px;
-}
+  <!-- =====================================
+       LIBRARIES
+  ===================================== -->
 
-.scroll-x {
-  overflow: auto;
-  width: 100%;
-}
+  <!-- CSV Parser -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-table {
-  border-collapse: collapse;
-  width: max-content;
-}
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-td, th {
-  border: 1px solid #999;
-  padding: 6px;
-  min-width: 40px;
-  text-align: center;
-  background: white;
-}
 
-.name {
-  position: sticky;
-  left: 0;
-  background: white;
-  min-width: 45px;
-  text-align: left;
-  padding-left: 4px;
-}
+  <!-- =====================================
+       CSS
+  ===================================== -->
 
-th:first-child {
-  position: sticky;
-  left: 0;
-  background: white;
-}
+  <style>
 
-.count {
-  background: #f5f5f5;
-  font-size: 12px;
-}
 
-.weekend {
-  background: #f2e9ff;
-}
+  /* =====================================
+     GENERAL
+  ===================================== */
 
-.today {
-  background: #dbeeff;
-}
+  body {
+    margin: 0;
+    font-family: Arial;
+    font-size: 14px;
+  }
 
-.dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  margin: auto;
-}
 
-.dot-ja { background:#3ccf5a; }
-.dot-ev { background:#ffd84d; }
-.dot-nein { background:#ff5a5a; }
+  /* =====================================
+     SCROLL CONTAINER
+  ===================================== */
 
-.tap {
-  animation: tapAnim 0.15s ease;
-}
+  .scroll-x {
+    overflow: auto;
+    width: 100%;
+  }
 
-@keyframes tapAnim {
-  0% { transform: scale(0.9); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
 
-#commentBox {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-  background: white;
-  border: 1px solid #999;
-  padding: 10px;
-  display: none;
-  z-index: 1000;
-}
+  /* =====================================
+     TABLE
+  ===================================== */
 
-</style>
+  table {
+    border-collapse: collapse;
+    width: max-content;
+  }
+
+  td,
+  th {
+    border: 1px solid #999;
+    padding: 6px;
+    min-width: 40px;
+    text-align: center;
+    background: white;
+  }
+
+
+  /* =====================================
+     NAME COLUMN (fix links)
+  ===================================== */
+
+  .name {
+    position: sticky;
+    left: 0;
+    background: white;
+    min-width: 45px;
+    text-align: left;
+    padding-left: 4px;
+  }
+
+  th:first-child {
+    position: sticky;
+    left: 0;
+    background: white;
+  }
+
+
+  /* =====================================
+     TOTAL ROW
+  ===================================== */
+
+  .count {
+    background: #f5f5f5;
+    font-size: 12px;
+  }
+
+
+  /* =====================================
+     WEEKEND / TODAY MARK
+  ===================================== */
+
+  .weekend {
+    background: #f2e9ff;
+  }
+
+  .today {
+    background: #dbeeff;
+  }
+
+
+  /* =====================================
+     DOTS (ja / ev / nein)
+  ===================================== */
+
+  .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin: auto;
+  }
+
+  .dot-ja {
+    background: #3ccf5a;
+  }
+
+  .dot-ev {
+    background: #ffd84d;
+  }
+
+  .dot-nein {
+    background: #ff5a5a;
+  }
+
+
+  /* =====================================
+     TAP ANIMATION
+  ===================================== */
+
+  .tap {
+    animation: tapAnim 0.15s ease;
+  }
+
+  @keyframes tapAnim {
+
+    0% {
+      transform: scale(0.9);
+    }
+
+    50% {
+      transform: scale(1.1);
+    }
+
+    100% {
+      transform: scale(1);
+    }
+
+  }
+
+
+  /* =====================================
+     COMMENT POPUP
+  ===================================== */
+
+  #commentBox {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border: 1px solid #999;
+    padding: 10px;
+    display: none;
+    z-index: 1000;
+  }
+
+
+  /* =====================================
+     COMMENT TOOLTIP
+  ===================================== */
+
+  #commentTip {
+    position: absolute;
+    background: white;
+    border: 1px solid #999;
+    padding: 5px;
+    font-size: 12px;
+    max-width: 200px;
+    display: none;
+    z-index: 2000;
+  }
+
+
+  </style>
 
 </head>
 
+
 <body>
 
-<div class="scroll-x">
-<table id="t"></table>
-</div>
 
-<div id="commentBox">
+  <!-- =====================================
+       TABLE CONTAINER
+  ===================================== -->
 
-<div id="commentTitle"></div>
+  <div class="scroll-x">
 
-<textarea id="commentText"
-style="width:260px;height:120px;"></textarea>
+    <!-- Haupttabelle -->
+    <table id="t"></table>
 
-<br><br>
+  </div>
 
-<button onclick="saveComment()">Speichern</button>
-<button onclick="closeComment()">Abbrechen</button>
 
-</div>
 
-<script>
+  <!-- =====================================
+       COMMENT POPUP
+       → mehrzeiliger Kommentar pro Datum
+  ===================================== -->
 
-const firebaseConfig = {
+  <div id="commentBox">
+
+    <div id="commentTitle"></div>
+
+    <textarea
+      id="commentText"
+      style="width:260px;height:120px;"
+    ></textarea>
+
+    <br><br>
+
+    <button onclick="saveComment()">
+      Speichern
+    </button>
+
+    <button onclick="closeComment()">
+      Abbrechen
+    </button>
+
+  </div>
+
+
+
+  <!-- =====================================
+       TOOLTIP FÜR KOMMENTAR (Hover)
+  ===================================== -->
+
+  <div id="commentTip"></div>
+
+
+
+  <!-- =====================================
+       SCRIPT START
+  ===================================== -->
+
+  <script>
+
+
+
+/* =====================================
+   FIREBASE CONFIG SWITCH
+   → automatisch Test / Prod erkennen
+===================================== */
+
+const firebaseConfigProd = {
   apiKey: "AIzaSyA_X89nznC06g7brnrVmQoFHG2SiTXk0Hc",
   authDomain: "goldies-89ea2.firebaseapp.com",
-  projectId: "goldies-89ea2"
+  projectId: "goldies-89ea2",
+  storageBucket: "goldies-89ea2.firebasestorage.app",
+  messagingSenderId: "210598012879",
+  appId: "1:210598012879:web:dca79e3e3eb237e5bb14ba"
 };
 
-firebase.initializeApp(firebaseConfig);
 
-const db = firebase.firestore();
+const firebaseConfigTest = {
+  apiKey: "AIzaSyA8W7v73ESxd_qUK15VzyUu_nx-6t0R7Yc",
+  authDomain: "goldies-test.firebaseapp.com",
+  projectId: "goldies-test",
+  storageBucket: "goldies-test.firebasestorage.app",
+  messagingSenderId: "472746893960",
+  appId: "1:472746893960:web:b31f810205dbcac420b53d"
+};
 
-let data = [];
-let comments = {};
-let currentCommentDate = null;
 
-let initialized = false;
-let saveTimer = null;
+  /* =====================================
+     URL prüfen
+  ===================================== */
+  
+  let firebaseConfig;
+  
+  if (location.href.includes("Goldies-Test")) {
+  
+    firebaseConfig = firebaseConfigTest;
+  
+  } else {
+  
+    firebaseConfig = firebaseConfigProd;
+  
+  }
+  
+  
+  /* =====================================
+     Firebase starten
+  ===================================== */
+  
+  firebase.initializeApp(firebaseConfig);
+  
+  const db = firebase.firestore();
 
-function autoSave() {
-  if (!initialized) return;
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(save, 500);
-}
 
-/* COMMENT */
 
-function openComment(date) {
-  currentCommentDate = date;
-  document.getElementById("commentTitle").innerText = "Kommentar " + date;
-  document.getElementById("commentText").value = comments[date] || "";
-  document.getElementById("commentBox").style.display = "block";
-}
+  /* =====================================
+     GLOBAL VARIABLES
+  ===================================== */
 
-function closeComment() {
-  document.getElementById("commentBox").style.display = "none";
-}
+  // Tabelle mit allen Daten
+  let data = [];
 
-function saveComment() {
-  comments[currentCommentDate] =
-    document.getElementById("commentText").value;
-  closeComment();
-  save();
-  draw();
-}
+  // Kommentare pro Datum
+  let comments = {};
 
-/* CSV */
+  // aktuelles Kommentar Datum
+  let currentCommentDate = null;
 
-function loadCSV() {
+  // Initialisierung fertig?
+  let initialized = false;
 
-  return new Promise(resolve => {
+  // Timer für Autosave
+  let saveTimer = null;
 
-    Papa.parse("./teilnahmen.csv", {
 
-      download: true,
 
-      complete: (res) => {
+  /* =====================================
+     AUTOSAVE
+     → speichert nach kurzer Pause
+  ===================================== */
 
-        let rows = res.data;
+  function autoSave() {
 
-        rows = rows.filter(r =>
-          r && r.some(v => v && v.trim() !== "")
-        );
+    if (!initialized) return;
 
-        let max = 0;
+    clearTimeout(saveTimer);
 
-        rows.forEach(r => {
-          if (r.length > max) max = r.length;
-        });
+    saveTimer = setTimeout(save, 500);
 
-        rows = rows.map(r => {
+  }
 
-          while (r.length < max) r.push("");
 
-          return r;
 
-        });
+  /* =====================================
+     TOOLTIP FUNKTIONEN
+  ===================================== */
 
-        resolve(rows);
+  function showTip(text, x, y) {
 
-      }
+    let tip = document.getElementById("commentTip");
+
+    tip.innerText = text;
+
+    tip.style.left = x + "px";
+    tip.style.top = y + "px";
+
+    tip.style.display = "block";
+
+  }
+
+
+  function hideTip() {
+
+    document.getElementById("commentTip").style.display = "none";
+
+  }
+
+
+
+  /* =====================================
+     COMMENT FUNCTIONS
+  ===================================== */
+
+  function openComment(date) {
+
+    currentCommentDate = date;
+
+    document.getElementById("commentTitle").innerText =
+      "Kommentar " + date;
+
+    document.getElementById("commentText").value =
+      comments[date] || "";
+
+    document.getElementById("commentBox").style.display =
+      "block";
+
+  }
+
+
+  function closeComment() {
+
+    document.getElementById("commentBox").style.display =
+      "none";
+
+  }
+
+
+  function saveComment() {
+
+    comments[currentCommentDate] =
+      document.getElementById("commentText").value;
+
+    closeComment();
+
+    save();
+    draw();
+
+  }
+
+
+
+  /* =====================================
+     CSV LADEN
+     → liest teilnahmen.csv
+  ===================================== */
+
+  function loadCSV() {
+
+    return new Promise(resolve => {
+
+      Papa.parse("./teilnahmen.csv", {
+
+        download: true,
+
+        complete: (res) => {
+
+          let rows = res.data;
+
+
+          // Leere Zeilen entfernen
+          rows = rows.filter(r =>
+            r && r.some(v => v && v.trim() !== "")
+          );
+
+
+          // längste Zeile finden
+          let max = 0;
+
+          rows.forEach(r => {
+            if (r.length > max) max = r.length;
+          });
+
+
+          // alle Zeilen gleich lang machen
+          rows = rows.map(r => {
+
+            while (r.length < max) r.push("");
+
+            return r;
+
+          });
+
+
+          resolve(rows);
+
+        }
+
+      });
 
     });
 
-  });
-
-}
-
-/* MERGE */
-
-function mergeData(csv, dbData) {
-
-  let result = [];
-
-  let rows = csv.length;
-  let cols = csv[0].length;
-
-  for (let r = 0; r < rows; r++) {
-
-    result[r] = [];
-
-    for (let c = 0; c < cols; c++) {
-
-      let csvVal = csv[r]?.[c] ?? "";
-      let dbVal = dbData?.[r]?.[c] ?? "";
-
-      if (r === 0) result[r][c] = csvVal;
-      else if (r === 1) result[r][c] = csvVal;
-      else if (c === 0) result[r][c] = csvVal;
-      else result[r][c] = dbVal || "";
-
-    }
-
   }
 
-  return result;
 
-}
 
-/* DATE */
+  /* =====================================
+     MERGE CSV + FIREBASE
+     → CSV bestimmt Struktur
+     → DB enthält Einträge
+  ===================================== */
 
-function isWeekend(text) {
+  function mergeData(csv, dbData) {
 
-  let p = text.split(".");
-  if (p.length < 2) return false;
+    let result = [];
 
-  let d = parseInt(p[0]);
-  let m = parseInt(p[1]) - 1;
+    let rows = csv.length;
+    let cols = csv[0].length;
 
-  let date = new Date(2026, m, d);
 
-  return date.getDay() === 0 || date.getDay() === 6;
+    for (let r = 0; r < rows; r++) {
 
-}
+      result[r] = [];
 
-function isToday(text) {
 
-  let p = text.split(".");
-  if (p.length < 2) return false;
+      for (let c = 0; c < cols; c++) {
 
-  let d = parseInt(p[0]);
-  let m = parseInt(p[1]) - 1;
+        let csvVal = csv[r]?.[c] ?? "";
+        let dbVal = dbData?.[r]?.[c] ?? "";
 
-  let today = new Date();
 
-  let date = new Date(today.getFullYear(), m, d);
+        // Datum-Zeile
+        if (r === 0) {
 
-  return (
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth()
-  );
+          result[r][c] = csvVal;
 
-}
+        }
 
-function isFutureOrToday(text) {
+        // Typ-Zeile
+        else if (r === 1) {
 
-  let p = text.split(".");
-  if (p.length < 2) return true;
+          result[r][c] = csvVal;
 
-  let d = parseInt(p[0]);
-  let m = parseInt(p[1]) - 1;
+        }
 
-  let date = new Date(2026, m, d);
+        // Name-Spalte
+        else if (c === 0) {
 
-  let today = new Date();
-  today.setHours(0,0,0,0);
+          result[r][c] = csvVal;
 
-  return date >= today;
+        }
 
-}
+        // Teilnahme
+        else {
 
-/* DRAW */
-
-function draw() {
-
-  let t = document.getElementById("t");
-  t.innerHTML = "";
-
-  if (!data.length) return;
-
-  let visibleCols = [];
-
-  for (let c = 0; c < data[0].length; c++) {
-    if (c === 0) visibleCols.push(c);
-    else if (isFutureOrToday(data[0][c])) visibleCols.push(c);
-  }
-
-  let counts = new Array(data[0].length).fill(0);
-
-  for (let r = 2; r < data.length; r++) {
-    for (let c = 1; c < data[0].length; c++) {
-      if (data[r][c] === "ja") counts[c]++;
-    }
-  }
-
-  // HEADER
-
-  let trHead = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let th = document.createElement("th");
-    let val = data[0][c] || "";
-
-    th.textContent = val;
-
-    if (comments[val]) th.innerHTML += " 💬";
-
-    th.onclick = () => openComment(val);
-
-    if (isWeekend(val)) th.classList.add("weekend");
-    if (isToday(val)) th.classList.add("today");
-
-    trHead.appendChild(th);
-
-  });
-
-  t.appendChild(trHead);
-
-
-  // TYPE
-
-  let trType = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let td = document.createElement("td");
-
-    let val = data[1]?.[c] || "";
-
-    td.textContent = val;
-
-    if (val === "Spiel") td.style.fontWeight = "bold";
-
-    if (c === 0) td.className = "name";
-
-    td.style.fontSize = "12px";
-    td.style.color = "#555";
-
-    trType.appendChild(td);
-
-  });
-
-  t.appendChild(trType);
-
-
-  // TOTAL
-
-  let trTotal = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let td = document.createElement("td");
-
-    if (c === 0) {
-      td.textContent = "Total";
-      td.className = "name";
-    } else {
-      td.textContent = counts[c];
-      td.className = "count";
-    }
-
-    trTotal.appendChild(td);
-
-  });
-
-  t.appendChild(trTotal);
-
-
-  // PLAYERS
-
-  for (let r = 2; r < data.length; r++) {
-
-    let tr = document.createElement("tr");
-
-    visibleCols.forEach(c => {
-
-      let td = document.createElement("td");
-
-      let val = data[r][c] || "";
-
-      if (c === 0) {
-
-        td.textContent = val;
-        td.className = "name";
-
-      } else {
-
-        td.onclick = () => {
-
-          td.classList.add("tap");
-
-          setTimeout(() => td.classList.remove("tap"), 150);
-
-          let order = ["","ja","ev","nein"];
-
-          let i = order.indexOf(data[r][c]);
-
-          i++;
-          if (i >= order.length) i = 0;
-
-          data[r][c] = order[i];
-
-          draw();
-          autoSave();
-
-        };
-
-        if (val) {
-
-          let dot = document.createElement("div");
-
-          dot.className = "dot";
-
-          if (val==="ja") dot.classList.add("dot-ja");
-          if (val==="ev") dot.classList.add("dot-ev");
-          if (val==="nein") dot.classList.add("dot-nein");
-
-          td.appendChild(dot);
+          result[r][c] = dbVal || "";
 
         }
 
       }
 
-      tr.appendChild(td);
+    }
+
+    return result;
+
+  }
+
+
+
+  /* =====================================
+     WEEKEND ERKENNEN
+     → Samstag / Sonntag markieren
+  ===================================== */
+
+  function isWeekend(text) {
+
+    let p = text.split(".");
+
+    if (p.length < 2) return false;
+
+    let d = parseInt(p[0]);
+    let m = parseInt(p[1]) - 1;
+
+    let date = new Date(2026, m, d);
+
+    let day = date.getDay();
+
+    return day === 0 || day === 6;
+
+  }
+
+
+
+  /* =====================================
+     HEUTE ERKENNEN
+  ===================================== */
+
+  function isToday(text) {
+
+    let p = text.split(".");
+
+    if (p.length < 2) return false;
+
+    let d = parseInt(p[0]);
+    let m = parseInt(p[1]) - 1;
+
+    let today = new Date();
+
+    let date =
+      new Date(today.getFullYear(), m, d);
+
+    return (
+
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth()
+
+    );
+
+  }
+
+
+
+  /* =====================================
+     ZUKUNFT ODER HEUTE
+     → alte Daten ausblenden
+  ===================================== */
+
+  function isFutureOrToday(text) {
+
+    let p = text.split(".");
+
+    if (p.length < 2) return true;
+
+    let d = parseInt(p[0]);
+    let m = parseInt(p[1]) - 1;
+
+    let date = new Date(2026, m, d);
+
+    let today = new Date();
+
+    today.setHours(0, 0, 0, 0);
+
+    return date >= today;
+
+  }
+
+
+  /* =====================================
+     DRAW TABLE
+     → baut komplette Tabelle neu
+  ===================================== */
+
+  function draw() {
+
+    let t = document.getElementById("t");
+
+    t.innerHTML = "";
+
+    if (!data.length) return;
+
+
+    /* =====================================
+       Sichtbare Spalten bestimmen
+       → nur Zukunft anzeigen
+    ===================================== */
+
+    let visibleCols = [];
+
+    for (let c = 0; c < data[0].length; c++) {
+
+      if (c === 0) {
+
+        visibleCols.push(c);
+        continue;
+
+      }
+
+      if (isFutureOrToday(data[0][c])) {
+
+        visibleCols.push(c);
+
+      }
+
+    }
+
+
+    /* =====================================
+       Total zählen
+    ===================================== */
+
+    let counts =
+      new Array(data[0].length).fill(0);
+
+    for (let r = 2; r < data.length; r++) {
+
+      for (let c = 1; c < data[0].length; c++) {
+
+        if (data[r][c] === "ja") {
+
+          counts[c]++;
+
+        }
+
+      }
+
+    }
+
+
+    /* =====================================
+       HEADER (Datum)
+    ===================================== */
+
+    let trHead =
+      document.createElement("tr");
+
+    visibleCols.forEach(c => {
+
+      let th =
+        document.createElement("th");
+
+      let val =
+        data[0][c] || "";
+
+      th.textContent = val;
+
+
+      /* Kommentar vorhanden */
+
+      if (comments[val]) {
+
+        th.innerHTML += " 💬";
+
+
+        th.onmouseover = (e) => {
+
+          showTip(
+            comments[val],
+            e.pageX + 10,
+            e.pageY + 10
+          );
+
+        };
+
+
+        th.onmouseout = () => {
+
+          hideTip();
+
+        };
+
+
+        th.onclick = () => {
+
+          openComment(val);
+
+        };
+
+      }
+
+      else {
+
+        th.onclick = () => {
+
+          openComment(val);
+
+        };
+
+      }
+
+
+      if (isWeekend(val))
+        th.classList.add("weekend");
+
+      if (isToday(val))
+        th.classList.add("today");
+
+
+      trHead.appendChild(th);
 
     });
 
-    t.appendChild(tr);
+    t.appendChild(trHead);
+
+
+
+    /* =====================================
+       TYPE ROW
+    ===================================== */
+
+    let trType =
+      document.createElement("tr");
+
+    visibleCols.forEach(c => {
+
+      let td =
+        document.createElement("td");
+
+      let val =
+        data[1]?.[c] || "";
+
+      td.innerHTML = val;
+
+      if (c === 0)
+        td.className = "name";
+
+      td.style.fontSize = "12px";
+      td.style.color = "#555";
+
+      if (val === "Spiel") {
+
+        td.style.fontWeight = "bold";
+
+      }
+
+      trType.appendChild(td);
+
+    });
+
+    t.appendChild(trType);
+
+
+
+    /* =====================================
+       TOTAL ROW
+    ===================================== */
+
+    let trTotal =
+      document.createElement("tr");
+
+    visibleCols.forEach(c => {
+
+      let td =
+        document.createElement("td");
+
+      if (c === 0) {
+
+        td.textContent = "Total";
+        td.className = "name";
+
+      }
+
+      else {
+
+        td.textContent = counts[c];
+        td.className = "count";
+
+      }
+
+      trTotal.appendChild(td);
+
+    });
+
+    t.appendChild(trTotal);
+
+
+
+    /* =====================================
+       PLAYERS
+    ===================================== */
+
+    for (let r = 2; r < data.length; r++) {
+
+      let tr =
+        document.createElement("tr");
+
+      visibleCols.forEach(c => {
+
+        let td =
+          document.createElement("td");
+
+        let val =
+          data[r][c] || "";
+
+
+        /* Name */
+
+        if (c === 0) {
+
+          td.textContent = val;
+          td.className = "name";
+
+        }
+
+        /* Teilnahme */
+
+        else {
+
+          td.onclick = () => {
+
+            td.classList.add("tap");
+
+            setTimeout(() => {
+
+              td.classList.remove("tap");
+
+            }, 150);
+
+
+            let order =
+              ["", "ja", "ev", "nein"];
+
+            let i =
+              order.indexOf(data[r][c]);
+
+            i++;
+
+            if (i >= order.length)
+              i = 0;
+
+            data[r][c] = order[i];
+
+            draw();
+            autoSave();
+
+          };
+
+
+          if (val) {
+
+            let dot =
+              document.createElement("div");
+
+            dot.className = "dot";
+
+            if (val === "ja")
+              dot.classList.add("dot-ja");
+
+            if (val === "ev")
+              dot.classList.add("dot-ev");
+
+            if (val === "nein")
+              dot.classList.add("dot-nein");
+
+            td.appendChild(dot);
+
+          }
+
+        }
+
+        tr.appendChild(td);
+
+      });
+
+      t.appendChild(tr);
+
+    }
+
+
+
+    /* =====================================
+       BOTTOM DATE
+    ===================================== */
+
+    let trBottom =
+      document.createElement("tr");
+
+    visibleCols.forEach(c => {
+
+      let th =
+        document.createElement("th");
+
+      let val =
+        data[0][c] || "";
+
+      th.textContent = val;
+
+      if (isWeekend(val))
+        th.classList.add("weekend");
+
+      if (isToday(val))
+        th.classList.add("today");
+
+      trBottom.appendChild(th);
+
+    });
+
+    t.appendChild(trBottom);
+
+
+
+    /* =====================================
+       BOTTOM TYPE
+    ===================================== */
+
+    let trTypeBottom =
+      document.createElement("tr");
+
+    visibleCols.forEach(c => {
+
+      let td =
+        document.createElement("td");
+
+      let val =
+        data[1]?.[c] || "";
+
+      td.textContent = val;
+
+      if (val === "Spiel") {
+
+        td.style.fontWeight = "bold";
+
+      }
+
+      if (c === 0)
+        td.className = "name";
+
+      td.style.fontSize = "12px";
+      td.style.color = "#555";
+
+      trTypeBottom.appendChild(td);
+
+    });
+
+    t.appendChild(trTypeBottom);
 
   }
 
 
-  // BOTTOM DATE
+  /* =====================================
+     LOAD
+     → CSV laden
+     → Firebase laden
+     → zusammenführen
+  ===================================== */
 
-  let trBottom = document.createElement("tr");
+/* =====================================
+   LOAD
+   -------------------------------------
+   Ablauf:
 
-  visibleCols.forEach(c => {
+   1. CSV laden (Struktur)
+   2. Firestore laden (Daten + Kommentare)
+   3. Wenn DB leer → CSV verwenden
+   4. CSV + DB zusammenführen
+   5. Falls nötig → DB neu speichern
+   6. Tabelle zeichnen
 
-    let th = document.createElement("th");
+   Diese Version ist stabil für:
 
-    let val = data[0][c] || "";
-
-    th.textContent = val;
-
-    if (isWeekend(val)) th.classList.add("weekend");
-    if (isToday(val)) th.classList.add("today");
-
-    trBottom.appendChild(th);
-
-  });
-
-  t.appendChild(trBottom);
-
-
-  // BOTTOM TYPE
-
-  let trTypeBottom = document.createElement("tr");
-
-  visibleCols.forEach(c => {
-
-    let td = document.createElement("td");
-
-    let val = data[1]?.[c] || "";
-
-    td.textContent = val;
-
-    if (val === "Spiel") td.style.fontWeight = "bold";
-
-    if (c === 0) td.className = "name";
-
-    td.style.fontSize = "12px";
-    td.style.color = "#555";
-
-    trTypeBottom.appendChild(td);
-
-  });
-
-  t.appendChild(trTypeBottom);
-
-}
-
-/* LOAD */
+   ✔ leere DB
+   ✔ fehlendes json
+   ✔ kaputtes json
+   ✔ neue CSV
+   ✔ neue Firebase
+   ✔ Test / Prod
+===================================== */
 
 async function load() {
 
+  /* =====================================
+     1. CSV laden
+  ===================================== */
+
   let csv = await loadCSV();
 
-  let doc = await db.collection("training").doc("list").get();
 
-  let dbData = null;
+  /* =====================================
+     Variablen vorbereiten
+  ===================================== */
 
-if (doc.exists) {
+  let dbData = null;   // Daten aus Firestore
+  let needSave = false; // muss DB neu geschrieben werden?
 
-  let d = doc.data();
 
-  if (d.json) {
-    dbData = JSON.parse(d.json);
+  /* =====================================
+     2. Firestore laden
+  ===================================== */
+
+  try {
+
+    const doc = await db
+      .collection("training")
+      .doc("list")
+      .get();
+
+
+    /* Dokument existiert */
+
+    if (doc.exists) {
+
+      const d = doc.data();
+
+
+      /* ---------------------------------
+         json vorhanden?
+      --------------------------------- */
+
+      if (d.json && d.json !== "") {
+
+        try {
+
+          // json → Array
+          dbData = JSON.parse(d.json);
+
+        }
+
+        catch (e) {
+
+          // json kaputt → neu schreiben
+          dbData = null;
+          needSave = true;
+
+        }
+
+      }
+
+      else {
+
+        // kein json → neu schreiben
+        needSave = true;
+
+      }
+
+
+      /* ---------------------------------
+         Kommentare laden
+      --------------------------------- */
+
+      comments = d.comments || {};
+
+    }
+
+    else {
+
+      // Dokument fehlt → neu schreiben
+      needSave = true;
+
+    }
+
   }
 
-  comments = d.comments || {};
+  catch (e) {
 
-}
+    console.log("Firestore error", e);
+
+    // Fehler → CSV benutzen
+    needSave = true;
+
+  }
+
+
+  /* =====================================
+     3. Wenn keine DB Daten → leer setzen
+  ===================================== */
+
+  if (!dbData) {
+
+    dbData = [];
+
+  }
+
+
+  /* =====================================
+     4. CSV + DB zusammenführen
+     CSV bestimmt Struktur
+     DB enthält Einträge
+  ===================================== */
 
   data = mergeData(csv, dbData);
 
+
+  /* =====================================
+     Initialisierung fertig
+  ===================================== */
+
   initialized = true;
+
+
+  /* =====================================
+     5. Falls DB leer → speichern
+  ===================================== */
+
+  if (needSave) {
+
+    await save();
+
+  }
+
+
+  /* =====================================
+     6. Tabelle zeichnen
+  ===================================== */
 
   draw();
 
 }
 
-/* SAVE */
+
+  /* =====================================
+     SAVE
+     → speichert Tabelle + Kommentare
+  ===================================== */
 
 async function save() {
 
-  await db.collection("training").doc("list").set({
+  const payload = {
     json: JSON.stringify(data),
     comments: comments
-  });
+  };
+
+
+  /* ===========================
+     Hauptspeicher
+  =========================== */
+
+  await db
+    .collection("training")
+    .doc("list")
+    .set(payload);
+
+
+  /* ===========================
+     Backup nur 1x pro Tag
+  =========================== */
+
+  const today =
+    new Date()
+      .toISOString()
+      .substring(0, 10); // YYYY-MM-DD
+
+
+  const backupRef =
+    db.collection("backup").doc(today);
+
+
+  const backupDoc =
+    await backupRef.get();
+
+
+  if (!backupDoc.exists) {
+
+    await backupRef.set(payload);
+
+    console.log("Backup erstellt:", today);
+
+  }
 
 }
 
-load();
 
-</script>
+
+  /* =====================================
+     START
+  ===================================== */
+
+  load();
+
+
+
+  </script>
 
 </body>
 </html>
