@@ -482,59 +482,76 @@ const firebaseConfigTest = {
 
   function mergeData(csv, dbData) {
 
-    let result = [];
+  let result = [];
 
-    let rows = csv.length;
-    let cols = csv[0].length;
+  // Falls keine DB-Daten vorhanden sind
+  if (!dbData) {
+    dbData = [];
+  }
+
+  let rows = csv.length;
+  let cols = csv[0].length;
+
+  for (let r = 0; r < rows; r++) {
+
+    result[r] = [];
+
+    for (let c = 0; c < cols; c++) {
+
+      let csvVal = csv[r]?.[c] ?? "";
+      let dbVal = dbData[r]?.[c] ?? "";
 
 
-    for (let r = 0; r < rows; r++) {
+      /* =====================================
+         Datum-Zeile
+      ===================================== */
 
-      result[r] = [];
+      if (r === 0) {
+
+        result[r][c] = csvVal;
+
+      }
 
 
-      for (let c = 0; c < cols; c++) {
+      /* =====================================
+         Typ-Zeile
+      ===================================== */
 
-        let csvVal = csv[r]?.[c] ?? "";
-        let dbVal = dbData?.[r]?.[c] ?? "";
+      else if (r === 1) {
+
+        result[r][c] = csvVal;
+
+      }
 
 
-        // Datum-Zeile
-        if (r === 0) {
+      /* =====================================
+         Namen-Spalte
+      ===================================== */
 
-          result[r][c] = csvVal;
+      else if (c === 0) {
 
-        }
+        result[r][c] = csvVal;
 
-        // Typ-Zeile
-        else if (r === 1) {
+      }
 
-          result[r][c] = csvVal;
 
-        }
+      /* =====================================
+         Teilnahme
+      ===================================== */
 
-        // Name-Spalte
-        else if (c === 0) {
+      else {
 
-          result[r][c] = csvVal;
-
-        }
-
-        // Teilnahme
-        else {
-
-          result[r][c] = dbVal || "";
-
-        }
+        result[r][c] = dbVal;
 
       }
 
     }
 
-    return result;
-
   }
 
+  return result;
+
+}
 
 
   /* =====================================
