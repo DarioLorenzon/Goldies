@@ -12,14 +12,11 @@ Datum,Typ,Ort,Zeit
 10.06.2026,Training
 17.06.2026,Training
 24.06.2026,Training
-14.07.2026,Training
 01.07.2026,Training
 08.07.2026,Training
-05.08.2026,Keine Halle
-12.08.2026,Keine Halle
-19.08.2026,Keine Halle
-20.08.2026,Training
-21.08.2026,Training
+05.08.2026, Training
+12.08.2026, Training
+19.08.2026, Training
 26.08.2026, Training
 02.09.2026, Training
 09.09.2026, Training
@@ -49,3 +46,4 @@ Datum,Typ,Ort,Zeit
 16.01.2027, Spiel
 06.03.2027, Spiel
 21.03.2027, Spiel
+
