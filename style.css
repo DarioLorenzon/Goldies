@@ -1,0 +1,221 @@
+/* =====================================
+   GOLDIES
+   -------------------------------------
+
+   Datei:
+   style.css
+
+   Version:
+   3.0.0
+
+   Beschreibung:
+   Gesamtes Layout und Design
+===================================== */
+
+
+/* =====================================
+   ALLGEMEIN
+===================================== */
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+
+/* =====================================
+   SCROLL CONTAINER
+===================================== */
+
+.scroll-x {
+    overflow: auto;
+    width: 100%;
+}
+
+
+/* =====================================
+   TABELLE
+===================================== */
+
+table {
+    border-collapse: collapse;
+    width: max-content;
+}
+
+table td,
+table th {
+    border: 1px solid #999;
+    padding: 6px;
+    min-width: 40px;
+    text-align: center;
+    background: white;
+}
+
+
+/* =====================================
+   FIXE NAMENSSPALTE
+===================================== */
+
+.name {
+    position: sticky;
+    left: 0;
+    background: white;
+    min-width: 45px;
+    padding-left: 4px;
+    text-align: left;
+}
+
+th:first-child {
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 2;
+}
+
+
+/* =====================================
+   TOTAL-ZEILE
+===================================== */
+
+.count {
+    background: #f5f5f5;
+    font-size: 12px;
+}
+
+
+/* =====================================
+   DATUMSMARKIERUNGEN
+===================================== */
+
+.weekend {
+    background: #f2e9ff;
+}
+
+.today {
+    background: #dbeeff;
+}
+
+
+/* =====================================
+   TEILNAHME-PUNKTE
+===================================== */
+
+.dot {
+    width: 14px;
+    height: 14px;
+    margin: auto;
+    border-radius: 50%;
+}
+
+.dot-ja {
+    background: #3ccf5a;
+}
+
+.dot-ev {
+    background: #ffd84d;
+}
+
+.dot-nein {
+    background: #ff5a5a;
+}
+
+
+/* =====================================
+   TAP ANIMATION
+===================================== */
+
+.tap {
+    animation: tapAnim .15s ease;
+}
+
+@keyframes tapAnim {
+
+    0% {
+        transform: scale(.9);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+
+}
+
+
+/* =====================================
+   KOMMENTAR-FENSTER
+===================================== */
+
+#commentBox {
+
+    position: fixed;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    display: none;
+
+    padding: 10px;
+
+    background: white;
+
+    border: 1px solid #999;
+
+    z-index: 1000;
+
+}
+
+
+/* =====================================
+   KOMMENTAR-TOOLTIP
+===================================== */
+
+#commentTip {
+
+    position: absolute;
+
+    display: none;
+
+    max-width: 220px;
+
+    padding: 5px;
+
+    background: white;
+
+    border: 1px solid #999;
+
+    font-size: 12px;
+
+    z-index: 2000;
+
+}
+
+
+/* =====================================
+   HIGHLIGHT
+===================================== */
+
+.highlight {
+
+    background: #ececec;
+
+    transition: background .18s ease;
+
+}
+
+.highlight-cell {
+
+    background: #ececec;
+
+    transform: scale(1.05);
+
+    transition: all .18s ease;
+
+}
+

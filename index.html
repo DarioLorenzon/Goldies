@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <!-- =====================================
+       META
+  ===================================== -->
+
+  <meta charset="UTF-8">
+
+  <!-- Mobile Darstellung -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- =====================================
+       LIBRARIES
+  ===================================== -->
+
+    <!-- CSV Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    
+  <!-- =====================================
+       CSS
+  ===================================== -->
+
+    <link rel="stylesheet" href="style.css?v=3.0.0">
+
+</head>
+  
+<body>
+
+  <!-- =====================================
+       TABLE CONTAINER
+  ===================================== -->
+
+  <div class="scroll-x">
+
+    <!-- Haupttabelle -->
+    <table id="t"></table>
+
+  </div>
+
+  <!-- =====================================
+       COMMENT POPUP
+       → mehrzeiliger Kommentar pro Datum
+  ===================================== -->
+
+  <div id="commentBox">
+
+    <div id="commentTitle"></div>
+
+    <textarea
+      id="commentText"
+      style="width:260px;height:120px;"
+    ></textarea>
+
+    <br><br>
+
+    <button onclick="saveComment()">
+      Speichern
+    </button>
+
+    <button onclick="closeComment()">
+      Abbrechen
+    </button>
+
+  </div>
+
+  <!-- =====================================
+       TOOLTIP FÜR KOMMENTAR (Hover)
+  ===================================== -->
+
+  <div id="commentTip"></div>
+
+  <!-- =====================================
+       SCRIPT START
+  ===================================== -->
+
+  <script>
+
+/* =====================================
+   ANIMATION
+===================================== */
+
+const HIGHLIGHT_TIME = 600;
+    
+
+/* =====================================
+   DATUM ERMITTELN
+   Unterstützt Jahreswechsel
+===================================== */
+
+function getDateObject(text) {
+
+    const p = text.split(".");
+
+    if (p.length < 2) return null;
+
+    const day = parseInt(p[0], 10);
+    const month = parseInt(p[1], 10) - 1;
+
+    const today = new Date();
+
+    let year = today.getFullYear();
+
+    let date = new Date(year, month, day);
+
+    // Wenn das Datum bereits vorbei ist,
+    // aber mehr als 6 Monate zurückliegt,
+    // gehört es wahrscheinlich ins nächste Jahr.
+    if (
+        date < today &&
+        (today.getMonth() - month) > 6
+    ) {
+
+        date = new Date(year + 1, month, day);
+    }
+    return date;
+}
+
+/* =====================================
+   DATUM PARSEN
+   TT.MM.JJJJ
+===================================== */
+
+function parseDate(text) {
+
+    if (!text) return null;
+
+    const p = text.split(".");
+
+    if (p.length !== 3)
+        return null;
+
+    const day = parseInt(p[0], 10);
+    const month = parseInt(p[1], 10) - 1;
+    const year = parseInt(p[2], 10);
+
+    return new Date(year, month, day);
+
+}
+
+  
+  /* =====================================
+   WEEKEND ERKENNEN
+===================================== */
+
+function isWeekend(text) {
+
+    const date = parseDate(text);
+
+    if (!date) return false;
+
+    const day = date.getDay();
+
+    return day === 0 || day === 6;
+
+}
+
+  /* =====================================
+   HEUTE ERKENNEN
+===================================== */
+
+function isToday(text) {
+
+    const date = parseDate(text);
+
+    if (!date) return false;
+
+    const today = new Date();
+
+    return (
+        date.getDate() === today.getDate() &&
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear()
+    );
+
+}
+
+ /* =====================================
+   ZUKUNFT ODER HEUTE
+===================================== */
+
+function isFutureOrToday(text) {
+
+    const date = parseDate(text);
+
+    if (!date)
+        return true;
+
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+
+    return date >= today;
+
+}
+    
+    /* =====================================
+   DATUM FORMATIEREN
+   Anzeige: TT.MM
+===================================== */
+
+function formatDate(text) {
+
+    if (!text)
+        return "";
+
+    // TT.MM.JJJJ -> TT.MM
+    if (text.length >= 10)
+        return text.substring(0, 5);
+
+    return text;
+
+}
+
+/* =====================================
+   NÄCHSTER STATUS
+   Longpress
+
+   leer → ja → ev → nein → leer
+===================================== */
+
+function nextStatus(r, c) {
+
+    const order = ["", "ja", "ev", "nein"];
+
+    let i = order.indexOf(data[r][c]);
+
+    i++;
+
+    if (i >= order.length)
+        i = 0;
+
+    data[r][c] = order[i];
+
+    draw();
+
+    autoSave();
+
+}
+
+    /* =====================================
+   HIGHLIGHT SELECTION
+===================================== */
+
+function highlightSelection(r, c, td) {
+
+    // Spielername
+    const nameCell =
+        document.querySelector(`td.name[data-row="${r}"]`);
+
+    // Datum
+    const headerCell =
+        document.querySelector(`th[data-col="${c}"]`);
+
+    if (nameCell)
+        nameCell.classList.add("highlight");
+
+    if (headerCell)
+        headerCell.classList.add("highlight");
+
+    td.classList.add("highlight-cell");
+
+    setTimeout(() => {
+
+        if (nameCell)
+            nameCell.classList.remove("highlight");
+
+        if (headerCell)
+            headerCell.classList.remove("highlight");
+
+        td.classList.remove("highlight-cell");
+
+    }, HIGHLIGHT_TIME);
+
+}
+    
+  /* =====================================
+     DRAW TABLE
+     → baut komplette Tabelle neu
+  ===================================== */
+
+  function draw() {
+
+    let t = document.getElementById("t");
+
+    t.innerHTML = "";
+
+    if (!data.length) return;
+
+    /* =====================================
+       Sichtbare Spalten bestimmen
+       → nur Zukunft anzeigen
+    ===================================== */
+
+    let visibleCols = [];
+
+for (let c = 0; c < data[0].length; c++) {
+
+    if (c === 0) {
+
+        visibleCols.push(c);
+        continue;
+    }
+
+    if (isFutureOrToday(data[0][c])) {
+
+        visibleCols.push(c);
+
+    }
+
+}
+
+
+          /* =====================================
+         TRAINER
+      ===================================== */
+
+        const TRAINER = [
+            "Dario",
+            "Füge"
+        ];
+
+
+          /* =====================================
+         Total zählen
+      ===================================== */
+      
+      let counts =
+          new Array(data[0].length).fill(0);
+      
+      for (let r = 2; r < data.length; r++) {
+      
+          // Trainer nicht mitzählen
+          if (TRAINER.includes(data[r][0]))
+              continue;
+      
+          for (let c = 1; c < data[0].length; c++) {
+      
+              if (data[r][c] === "ja") {
+      
+                  counts[c]++;
+      
+              }
+      
+          }
+      
+      }
+
+
+    /* =====================================
+       HEADER (Datum)
+    ===================================== */
+
+    let trHead =
+      document.createElement("tr");
+
+    visibleCols.forEach(c => {
+
+      let th =
+        document.createElement("th");
+      
+        th.dataset.col = c;
+
+      let val =
+        data[0][c] || "";
+
+      th.textContent = formatDate(val);
+
+
+      /* Kommentar vorhanden */
+
+      if (comments[val]) {
+
+        th.innerHTML += " 💬";
+
+
+        th.onmouseover = (e) => {
+
+          showTip(
+            comments[val],
+            e.pageX + 10,
+            e.pageY + 10
+          );
+
+        };
+
+        th.onmouseout = () => {
+
+          hideTip();
+
+        };
+
+        th.onclick = () => {
+
+          openComment(val);
+
+        };
+
+      }
+
+      else {
+
+        th.onclick = () => {
+
+          openComment(val);
+
+        };
+
+      }
+
+      if (isWeekend(val))
+        th.classList.add("weekend");
+
+      if (isToday(val))
+        th.classList.add("today");
+
+      trHead.appendChild(th);
+
+    });
+
+    t.appendChild(trHead);
+
+    /* =====================================
+       TYPE ROW
+    ===================================== */
+
+    let trType =
+      document.createElement("tr");
+
+    visibleCols.forEach(c => {
+
+      let td =
+        document.createElement("td");
+
+      let val =
+        data[1]?.[c] || "";
+
+      td.innerHTML = val;
+
+      if (c === 0)
+        td.className = "name";
+
+      td.style.fontSize = "12px";
+      td.style.color = "#555";
+
+      if (val === "Spiel") {
+
+        td.style.fontWeight = "bold";
+
+      }
+
+      trType.appendChild(td);
+
+    });
+
+    t.appendChild(trType);
+
+    /* =====================================
+       TOTAL ROW
+    ===================================== */
+
+    let trTotal =
+      document.createElement("tr");
+
+    visibleCols.forEach(c => {
+
+      let td =
+        document.createElement("td");
+
+      if (c === 0) {
+
+        td.textContent = "Total";
+        td.className = "name";
+
+      }
+
+      else {
+
+        td.textContent = counts[c];
+        td.className = "count";
+
+      }
+
+      trTotal.appendChild(td);
+
+    });
+
+    t.appendChild(trTotal);
+
+    /* =====================================
+   PLAYERS
+===================================== */
+
+for (let r = 2; r < data.length; r++) {
+
+    const tr = document.createElement("tr");
+
+    visibleCols.forEach(c => {
+
+        const td = document.createElement("td");
+
+        const val = data[r][c] || "";
+
+        /* ==============================
+           Name
+        ============================== */
+
+        if (c === 0) {
+
+            td.textContent = val;
+            td.className = "name";
+            td.dataset.row = r;
+
+        }
+
+        /* ==============================
+           Teilnahme
+        ============================== */
+
+        else {
+
+            td.dataset.row = r;
+            td.dataset.col = c;
+
+            td.onclick = () => {
+
+                highlightSelection(r, c, td);
+
+                setTimeout(() => {
+
+                    nextStatus(r, c);
+
+                }, HIGHLIGHT_TIME);
+
+            };
+
+            /* Punkt anzeigen */
+
+            if (val) {
+
+                const dot = document.createElement("div");
+
+                dot.className = "dot";
+
+                if (val === "ja")
+                    dot.classList.add("dot-ja");
+
+                else if (val === "ev")
+                    dot.classList.add("dot-ev");
+
+                else if (val === "nein")
+                    dot.classList.add("dot-nein");
+
+                td.appendChild(dot);
+
+            }
+
+        }
+
+        tr.appendChild(td);
+
+    });
+
+    t.appendChild(tr);
+
+}
+
+    /* =====================================
+       BOTTOM DATE
+    ===================================== */
+
+    let trBottom =
+      document.createElement("tr");
+
+    visibleCols.forEach(c => {
+
+      let th =
+        document.createElement("th");
+
+      let val =
+        data[0][c] || "";
+
+     th.textContent = formatDate(val);
+
+      if (isWeekend(val))
+        th.classList.add("weekend");
+
+      if (isToday(val))
+        th.classList.add("today");
+
+      trBottom.appendChild(th);
+
+    });
+
+    t.appendChild(trBottom);
+
+    /* =====================================
+       BOTTOM TYPE
+    ===================================== */
+
+    let trTypeBottom =
+      document.createElement("tr");
+
+    visibleCols.forEach(c => {
+
+      let td =
+        document.createElement("td");
+
+      let val =
+        data[1]?.[c] || "";
+
+      td.textContent = val;
+
+      if (val === "Spiel") {
+
+        td.style.fontWeight = "bold";
+
+      }
+
+      if (c === 0)
+        td.className = "name";
+
+      td.style.fontSize = "12px";
+      td.style.color = "#555";
+
+      trTypeBottom.appendChild(td);
+
+    });
+
+    t.appendChild(trTypeBottom);
+
+  }
+
+  </script>
+
+ <!-- =====================================
+     JAVASCRIPT MODULE
+===================================== -->
+
+<script src="firebase.js?v=3.0.0"></script>
+<script src="csv.js?v=3.0.0"></script>
+<script src="comments.js?v=3.0.0"></script>
+<script src="backup.js?v=3.0.0"></script>
+<script src="main.js?v=3.0.0"></script>
+<script src="admin.js?v=3.0.0"></script>
+
+</body>
+</html>
