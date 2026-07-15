@@ -33,7 +33,7 @@ const APP = {
 
     admin: {
 
-        pin: "1234"
+        pin: "0601"
 
     }
 
