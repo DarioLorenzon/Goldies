@@ -51,27 +51,19 @@ adminButton.innerHTML = "⚙️";
 Object.assign(adminButton.style, {
 
     position: "fixed",
-    bottom: "15px",
-    right: "15px",
-
-    width: "50px",
-    height: "50px",
-
+    bottom: "12px",
+    right: "12px",
+    width: "36px",
+    height: "36px",
+    borderRadius: "50%",
+    background: "#1976d2",
+    color: "white",
+    fontSize: "20px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-
-    borderRadius: "50%",
-
-    background: "#1976d2",
-    color: "white",
-
-    fontSize: "28px",
-
     cursor: "pointer",
-
-    boxShadow: "0 2px 8px rgba(0,0,0,.3)",
-
+    boxShadow: "0 1px 4px rgba(0,0,0,.25)",
     zIndex: "9999"
 
 });
