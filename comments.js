@@ -56,6 +56,8 @@ function hideTip() {
 
 function openComment(date) {
 
+   console.log("openComment:", date);
+
     currentCommentDate = date;
 
     document
@@ -92,6 +94,8 @@ function closeComment() {
 
 function saveComment() {
 
+   console.log("currentCommentDate =", currentCommentDate);
+   
     comments[currentCommentDate] =
 
         document
