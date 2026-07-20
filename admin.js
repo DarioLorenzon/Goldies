@@ -54,7 +54,7 @@ Object.assign(adminButton.style, {
     bottom: "12px",
     right: "12px",
     width: "20px",
-    height: "36px",
+    height: "20px",
     borderRadius: "50%",
     background: "#1976d2",
     color: "white",
