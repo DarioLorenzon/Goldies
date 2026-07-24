@@ -165,6 +165,14 @@ async function load() {
 
 async function save() {
 
+    try {
+        await createDailyBackup();
+    }
+    catch (err) {
+        console.error("Backup konnte nicht erstellt werden:", err);
+        // Trotzdem weiterspeichern
+    }
+
     const payload = {
 
         json: JSON.stringify(data),
@@ -179,7 +187,6 @@ async function save() {
         .set(payload);
 
 }
-
 
 
 
