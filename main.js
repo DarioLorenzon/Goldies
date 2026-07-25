@@ -6,7 +6,7 @@
    main.js
 
    Version:
-   3.0.0
+   3.1.0
 
    Beschreibung:
    Hauptprogramm
@@ -57,6 +57,69 @@ function autoSave() {
 
 
 /* =====================================
+   TABELLEN VERGLEICHEN
+===================================== */
+
+/* =====================================
+   STRUKTUR VERGLEICHEN
+
+   Vergleicht nur:
+
+   - Datum
+   - Typ
+   - Spieler
+
+   Nicht:
+
+   - Teilnahmen
+   - Kommentare
+
+===================================== */
+
+function structureChanged(csv, dbData) {
+
+    // Noch keine Daten vorhanden
+    if (!dbData || dbData.length === 0)
+        return true;
+
+    // Anzahl Zeilen
+    if (csv.length !== dbData.length)
+        return true;
+
+    // Anzahl Spalten
+    if (csv[0].length !== dbData[0].length)
+        return true;
+
+    // Datum vergleichen
+    for (let c = 0; c < csv[0].length; c++) {
+
+        if ((csv[0][c] || "") !== (dbData[0][c] || ""))
+            return true;
+
+    }
+
+    // Typ vergleichen
+    for (let c = 0; c < csv[1].length; c++) {
+
+        if ((csv[1][c] || "") !== (dbData[1][c] || ""))
+            return true;
+
+    }
+
+    // Spieler vergleichen
+    for (let r = 2; r < csv.length; r++) {
+
+        if ((csv[r][0] || "") !== (dbData[r][0] || ""))
+            return true;
+
+    }
+
+    return false;
+
+}
+
+
+/* =====================================
    DATEN LADEN
 
    Ablauf
@@ -64,7 +127,7 @@ function autoSave() {
    1. CSV laden
    2. Firestore laden
    3. Zusammenführen
-   4. Falls nötig speichern
+   4. Falls nötig synchronisieren
    5. Tabelle zeichnen
 
 ===================================== */
@@ -98,13 +161,14 @@ async function load() {
 
                 catch {
 
+                    console.warn("Firestore JSON konnte nicht gelesen werden.");
+
                     dbData = null;
                     needSave = true;
 
                 }
 
             }
-
             else {
 
                 needSave = true;
@@ -114,7 +178,6 @@ async function load() {
             comments = d.comments || {};
 
         }
-
         else {
 
             needSave = true;
@@ -122,7 +185,6 @@ async function load() {
         }
 
     }
-
     catch (err) {
 
         console.error(err);
@@ -142,7 +204,10 @@ async function load() {
 
     initialized = true;
 
-    if (needSave) {
+    // Firestore synchronisieren, wenn sich die CSV-Struktur geändert hat
+    if (needSave || structureChanged(csv, dbData)) {
+
+        console.log("CSV-Struktur geändert → Firestore wird synchronisiert.");
 
         await save();
 
@@ -166,11 +231,16 @@ async function load() {
 async function save() {
 
     try {
+
         await createDailyBackup();
+
     }
     catch (err) {
+
         console.error("Backup konnte nicht erstellt werden:", err);
+
         // Trotzdem weiterspeichern
+
     }
 
     const payload = {
@@ -187,7 +257,6 @@ async function save() {
         .set(payload);
 
 }
-
 
 
 /* =====================================

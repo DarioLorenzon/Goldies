@@ -6,7 +6,7 @@
    csv.js
 
    Version:
-   3.0.0
+   3.1.0
 
    Beschreibung:
    - kalender.csv laden

@@ -174,6 +174,8 @@ async function restoreBackup() {
 
     }
 
+    console.log(doc.data());
+
 
     /* ==============================
        Sicherheitsabfrage
