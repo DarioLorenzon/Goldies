@@ -122,6 +122,10 @@ adminWindow.innerHTML = `
 📂 Backup wiederherstellen
 </button><br><br>
 
+<button id="btnBackupExplorer" class="adminBtn">
+🗂 Backup Explorer
+</button><br><br>
+
 <button id="btnStats" class="adminBtn">
 📊 Statistik
 </button><br><br>
@@ -202,6 +206,14 @@ document.getElementById("btnBackup").onclick = async () => {
 document.getElementById("btnRestore").onclick = async () => {
 
     await restoreBackup();
+
+};
+
+/* Backup Explorer */
+
+document.getElementById("btnBackupExplorer").onclick = () => {
+
+    openBackupExplorer();
 
 };
 
